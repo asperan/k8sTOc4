@@ -2,6 +2,7 @@ package visitor;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import model.C4Component;
 
@@ -12,6 +13,7 @@ public class VisitorUtils {
     public static void accept(HasMetadata resource,
                               KubernetesResourceVisitor visitor) {
         if (resource instanceof Deployment d) visitor.visit(d);
+        else if (resource instanceof StatefulSet s) visitor.visit(s);
         else if (resource instanceof Service s) visitor.visit(s);
         else if (resource instanceof Ingress i) visitor.visit(i);
         else visitor.visit(resource); // fallback generico

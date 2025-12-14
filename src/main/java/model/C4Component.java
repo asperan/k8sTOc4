@@ -16,15 +16,17 @@ public class C4Component {
 
     private String namespace="default";
     private String name;
+    private String id;
     private String image;
     private String kind;
-    private String description;
+    private String description="";
     private Map<String, String> metadata = new HashMap<>();
     private Map<String, String> env = new HashMap<>();
     public C4Component(String namespace , String name, String kind) {
         if(namespace!=null ){
             this.namespace=namespace;
         }
+        this.id= kind.toLowerCase() + "_" + name;
         this.name = name;
         this.kind = kind;
     }

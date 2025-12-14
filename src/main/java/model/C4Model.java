@@ -14,6 +14,9 @@ public  class C4Model {
     private Set<String> specifications = new HashSet<>();
     private Set<C4Relationship> relationships = new HashSet<>();
 
+    public C4Model(){
+        specifications.add("namespace");
+    }
     public void addNamespace( C4Namespace s) { namespaces.put(s.getName(),s);}
 
     public void addRelationship(C4Relationship r) { relationships.add(r); }
