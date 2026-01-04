@@ -1,0 +1,5 @@
+views {
+    view prova{
+        include demo-app, demo-app.**
+    }
+}

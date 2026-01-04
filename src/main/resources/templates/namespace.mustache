@@ -1,6 +1,10 @@
 namespace {{name}} {
+{{#labelGroups}}
+    {{> labelgroup.mustache}}
+{{/labelGroups}}
+
 {{#components}}
-    {{> component}}
+    {{> component.mustache}}
 {{/components}}
 
 {{#relations}}

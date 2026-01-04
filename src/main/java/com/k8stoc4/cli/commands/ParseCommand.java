@@ -38,6 +38,13 @@ public class ParseCommand implements Runnable {
     )
     private Optional<String> output;
 
+    @CommandLine.Option(
+            names = {"--group-by-label"},
+            description = "label key for grouping (e.g. app.kubernetes.io/name, app)",
+            required = false
+    )
+    private Optional<String> groupByLabel;
+
     @Override
     public void run() {
         try (KubernetesClient client = new KubernetesClientBuilder().build();
@@ -49,6 +56,7 @@ public class ParseCommand implements Runnable {
                 VisitorUtils.accept(r, visitor);
             }
             visitor.addAllRelationships();
+            groupByLabel.ifPresent(visitor::groupComponentsByLabel);
             C4DslRenderer renderer=new C4DslRenderer();
 
             if (output.isPresent()) {

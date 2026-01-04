@@ -66,6 +66,19 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         addRBACRelationships();
     }
 
+    public void groupComponentsByLabel(String labelKey) {
+        for (C4Namespace namespace : model.getNamespaces().values()) {
+            for (C4Component component : new HashSet<>(namespace.getComponents())) {
+                String labelValue = component.getLabels().get(labelKey);
+                if (labelValue != null && !labelValue.isEmpty()) {
+                    C4LabelGroup group = namespace.getOrCreateLabelGroup(labelKey, labelValue);
+                    group.addComponents(component);
+                    namespace.removeComponent(component);
+                }
+            }
+        }
+    }
+
     private void addHPARelationships() {
         for (String ns : model.getNamespaces().keySet()) {
             C4Namespace namespace = model.getNamespaces().get(ns);

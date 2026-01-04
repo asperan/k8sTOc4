@@ -28,6 +28,30 @@ public class C4DslRenderer {
     private String renderNamespace(C4Namespace namespace) {
         Mustache mustache = MF.compile("templates/namespace.mustache");
 
+        List<Map<String, Object>> labelGroups = new ArrayList<>();
+        for (C4LabelGroup lg : namespace.getLabelGroups()) {
+            Map<String, Object> lgModel = new HashMap<>();
+            lgModel.put("name", lg.getName());
+            lgModel.put("components", lg.getComponents().stream()
+                .map(c -> {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("kind", c.getKind().toLowerCase());
+                    model.put("id", c.getId().replace(".", "-"));
+                    model.put("name", c.getName());
+                    model.put("technology", c.getKind());
+                    model.put("description", c.getDescription());
+                    model.put("labels", Optional.ofNullable(c.getLabels()).orElse(Map.of()).entrySet().stream()
+                            .map(e -> Map.of("key", e.getKey(), "value", e.getValue()))
+                            .toList());
+                    model.put("annotations", Optional.ofNullable(c.getAnnotations()).orElse(Map.of()).entrySet().stream()
+                            .map(e -> Map.of("key", e.getKey(), "value", e.getValue()))
+                            .toList());
+                    return model;
+                })
+                .toList());
+            labelGroups.add(lgModel);
+        }
+
         List<Map<String, Object>> comps =
                 namespace.getComponents().stream()
                         .map(c -> {
@@ -39,9 +63,6 @@ public class C4DslRenderer {
                             model.put("technology", c.getKind());
                             model.put("description", c.getDescription());
 
-                            //model.put("icon", iconFor(c.getResource().getKind()));
-
-                            // 🔹 labels
                             model.put(
                                     "labels",
                                     Optional.ofNullable(c.getLabels()).orElse(Map.of()).entrySet().stream()
@@ -52,7 +73,6 @@ public class C4DslRenderer {
                                             .toList()
                             );
 
-                            // 🔹 annotations
                             model.put(
                                     "annotations",
                                     Optional.ofNullable(c.getAnnotations()).orElse(Map.of()).entrySet().stream()
@@ -76,6 +96,7 @@ public class C4DslRenderer {
 
         Map<String, Object> ctx = Map.of(
                 "name", namespace.getName(),
+                "labelGroups", labelGroups,
                 "components", comps,
                 "relations", relations
         );
