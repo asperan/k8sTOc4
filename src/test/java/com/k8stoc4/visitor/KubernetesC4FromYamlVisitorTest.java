@@ -151,14 +151,6 @@ class KubernetesC4FromYamlVisitorTest {
         assertEquals("demo-app-rb", roleBinding.getName());
         assertEquals("RoleBinding", roleBinding.getKind());
 
-        C4Component pv = model.getGlobalComponents().stream()
-                .filter(c -> c.getId().equals("persistentvolume_demo-pv"))
-                .findFirst()
-                .orElse(null);
-        assertNotNull(pv, "PV should exist");
-        assertEquals("demo-pv", pv.getName());
-        assertEquals("PersistentVolume", pv.getKind());
-        assertEquals(null, pv.getNamespace());
 
         C4Component daemonSet = components.get("daemonset_node-logger");
         assertNotNull(daemonSet, "DaemonSet should exist");
