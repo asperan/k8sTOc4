@@ -39,7 +39,14 @@ public class ParseCommand implements Runnable {
     private Optional<String> output;
 
     @CommandLine.Option(
-            names = {"--group-by-label"},
+            names = {"-n", "--namespace"},
+            description = "force namespace",
+            required = false
+    )
+    private Optional<String> defaultNs;
+
+    @CommandLine.Option(
+            names = {"-g","--group-by-label"},
             description = "label key for grouping (e.g. app.kubernetes.io/name, app)",
             required = false
     )
@@ -51,7 +58,7 @@ public class ParseCommand implements Runnable {
              FileInputStream fis = new FileInputStream(new File(input))) {
 
             List<HasMetadata> resources = client.load(fis).items();
-            C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor();
+            C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor(defaultNs);
             for (HasMetadata r : resources) {
                 VisitorUtils.accept(r, visitor);
             }

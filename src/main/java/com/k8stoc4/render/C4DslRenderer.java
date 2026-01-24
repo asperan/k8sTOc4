@@ -90,7 +90,7 @@ public class C4DslRenderer {
         List<Map<String, Object>> labelGroups = new ArrayList<>();
         for (C4LabelGroup lg : namespace.getLabelGroups()) {
             Map<String, Object> lgModel = new HashMap<>();
-            lgModel.put("name", lg.getName());
+            lgModel.put("name", lg.getName().replace(".","-"));
             lgModel.put("components", lg.getComponents().stream()
                 .map(c -> {
                     Map<String, Object> model = new HashMap<>();

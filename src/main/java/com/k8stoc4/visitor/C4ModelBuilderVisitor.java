@@ -25,6 +25,15 @@ import static com.k8stoc4.visitor.VisitorUtils.containerMatchesSelector;
 public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
     private final C4Model model = new C4Model();
+    private String defaultNS = Constants.DEFAULT_NAMESPACE;;
+
+
+    public C4ModelBuilderVisitor() {
+    }
+
+    public C4ModelBuilderVisitor(Optional<String> defaultNs) {
+        defaultNs.ifPresent(s -> this.defaultNS = s);
+    }
 
     private C4Namespace getOrCreateSystem(String ns) {
         return model.getNamespaces().computeIfAbsent(ns, C4Namespace::new);
@@ -339,12 +348,12 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(StatefulSet statefulSet) {
         model.getSpecifications().add(statefulSet.getKind().toLowerCase());
-        String ns = Optional.ofNullable(statefulSet.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(statefulSet.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
 
         C4Component component = new C4Component(
                 statefulSet,
-                statefulSet.getMetadata().getNamespace(),
+                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? statefulSet.getMetadata().getNamespace():defaultNS,
                 statefulSet.getMetadata().getName(),
                 statefulSet.getKind());
 
@@ -357,12 +366,12 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(ReplicaSet replicaSet) {
         model.getSpecifications().add(replicaSet.getKind().toLowerCase());
-        String ns = Optional.ofNullable(replicaSet.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(replicaSet.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
 
         C4Component component = new C4Component(
                 replicaSet,
-                replicaSet.getMetadata().getNamespace(),
+                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? replicaSet.getMetadata().getNamespace():defaultNS,
                 replicaSet.getMetadata().getName(),
                 replicaSet.getKind());
 
@@ -375,7 +384,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(Pod pod) {
         model.getSpecifications().add(pod.getKind().toLowerCase());
-        String ns = Optional.ofNullable(pod.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(pod.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
 
         C4Component component = new C4Component(
@@ -393,12 +402,12 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(Deployment deployment) {
         model.getSpecifications().add(deployment.getKind().toLowerCase());
-        String ns = Optional.ofNullable(deployment.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(deployment.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
 
         C4Component component = new C4Component(
                 deployment,
-                deployment.getMetadata().getNamespace(),
+                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? deployment.getMetadata().getNamespace():defaultNS,
                 deployment.getMetadata().getName(),
                 deployment.getKind());
 
@@ -492,10 +501,10 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(Service svc) {
         model.getSpecifications().add(svc.getKind().toLowerCase());
-        String ns = Optional.ofNullable(svc.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(svc.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
 
-        C4Component service = new C4Component(svc, svc.getMetadata().getNamespace(),
+        C4Component service = new C4Component(svc, defaultNS.equals(Constants.DEFAULT_NAMESPACE)? svc.getMetadata().getNamespace():defaultNS,
                 svc.getMetadata().getName(), svc.getKind());
         namespace.addComponents(service);
     }
@@ -503,10 +512,13 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(Ingress ing) {
         model.getSpecifications().add(ing.getKind().toLowerCase());
-        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
-        C4Component ingress = new C4Component(ing, ing.getMetadata().getNamespace(),
-                ing.getMetadata().getName(), ing.getKind());
+        C4Component ingress =
+                new C4Component(ing,
+                        defaultNS.equals(Constants.DEFAULT_NAMESPACE)? ing.getMetadata().getNamespace():defaultNS,
+                        ing.getMetadata().getName(),
+                        ing.getKind());
         namespace.addComponents(ingress);
 
         for (IngressRule rule : ing.getSpec().getRules()) {
@@ -525,9 +537,9 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     @Override
     public void visit(io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress ing) {
         model.getSpecifications().add(ing.getKind().toLowerCase());
-        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
-        C4Component ingress = new C4Component(ing, ing.getMetadata().getNamespace(),
+        C4Component ingress = new C4Component(ing, defaultNS.equals(Constants.DEFAULT_NAMESPACE)? ing.getMetadata().getNamespace():defaultNS,
                 ing.getMetadata().getName(), ing.getKind());
         namespace.addComponents(ingress);
 
@@ -546,7 +558,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
     public void visit(io.fabric8.kubernetes.api.model.extensions.Ingress ing) {
         model.getSpecifications().add(ing.getKind().toLowerCase());
-        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+        String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
         C4Component ingress = new C4Component(ing, ing.getMetadata().getNamespace(),
                 ing.getMetadata().getName(), ing.getKind());
@@ -575,7 +587,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
             component.setNamespace(Constants.CLUSTER_LEVEL);
             model.addClusterScopedComponent(component);
         } else {
-            String ns = Optional.ofNullable(resource.getMetadata().getNamespace()).orElse(Constants.DEFAULT_NAMESPACE);
+            String ns = Optional.ofNullable(resource.getMetadata().getNamespace()).orElse(defaultNS);
             C4Namespace system = getOrCreateSystem(ns);
             system.addComponents(component);
         }
