@@ -55,7 +55,7 @@ public class ParseCommand implements Runnable {
     @Override
     public void run() {
         try (KubernetesClient client = new KubernetesClientBuilder().build();
-             FileInputStream fis = new FileInputStream(new File(input))) {
+             FileInputStream fis = new FileInputStream(input)) {
 
             List<HasMetadata> resources = client.load(fis).items();
             C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor(defaultNs);
