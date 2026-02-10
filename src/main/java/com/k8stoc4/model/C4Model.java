@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -23,4 +24,11 @@ public  class C4Model {
     public void addRelationship(C4Relationship r) { relationships.add(r); }
 
     public void addClusterScopedComponent(C4Component c) { clusterScopedComponents.add(c); }
+
+    public Set<C4Component> getComponentsByKind(String namespace,String kind){
+        return namespaces.get(namespace).getComponents().stream().parallel()
+                .filter(c4Component ->kind.equalsIgnoreCase(c4Component.getKind()))
+                .collect(Collectors.toSet());
+    }
+
  }

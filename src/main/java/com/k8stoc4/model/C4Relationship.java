@@ -13,7 +13,8 @@ public class C4Relationship {
     public String source;      
     public String target;      
     public String description; 
-    public String technology;  
+    public String technology;
+    public String tag="";
 
     public C4Relationship(String source,
                           String target,
@@ -23,5 +24,17 @@ public class C4Relationship {
         this.target = target;
         this.description = description;
         this.technology = technology;
+    }
+
+    public C4Relationship(String source,
+                          String target,
+                          String description,
+                          String technology,
+                          String tag) {
+        this.source = source;
+        this.target = target;
+        this.description = description;
+        this.technology = technology;
+        this.tag=tag;
     }
 }

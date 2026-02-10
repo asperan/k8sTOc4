@@ -150,7 +150,7 @@ public class C4DslRenderer {
         List<String> relations = new ArrayList<>();
 
         for (C4Relationship rel : namespace.getRelationships()) {
-            relations.add(rel.getSource() + " -> " + rel.getTarget());
+            relations.add(rel.getSource() + " -> " + rel.getTarget()+" "+rel.getTag());
         }
 
         Map<String, Object> ctx = Map.of(

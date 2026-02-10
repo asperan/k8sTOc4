@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import com.k8stoc4.model.*;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.k8stoc4.visitor.VisitorUtils.containerMatchesSelector;
 
@@ -41,6 +43,57 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
     private boolean isClusterScopedResource(HasMetadata resource) {
         return Constants.isClusterScoped(resource.getKind());
+    }
+
+    private void addServiceToServiceRelationships() {
+
+        model.getNamespaces().forEach((ns, namespace) -> {
+        Map<String, C4Component> servicesByFqdn =
+                model.getComponentsByKind(ns, "service").stream()
+                        .collect(Collectors.toMap(
+                                s -> s.getName() + "." + s.getNamespace(),
+                                Function.identity()
+                        ));
+        model.getComponentsByKind(ns, "deployment").forEach(component -> {
+
+            Deployment deployment = (Deployment) component.getResource();
+            deployment.getSpec()
+                .getTemplate()
+                .getSpec()
+                .getContainers()
+                .forEach(container -> {
+                    if (container.getEnv() == null) return;
+                    container.getEnv().stream()
+                        .map(EnvVar::getValue)
+                        .filter(this::isHttpUrl)
+                        .forEach(value ->
+                                servicesByFqdn.forEach((fqdn, service) -> {
+                                    if (value.contains(fqdn)) {
+                                        namespace.addRelationship(
+                                                buildRelationship(component, service,"#service2Service")
+                                        );
+                                    }
+                                })
+                        );
+                });
+        });
+        });
+    }
+
+
+    private C4Relationship buildRelationship(C4Component source, C4Component target, String tag) {
+        return new C4Relationship(
+                source.getNamespace() + "." + source.getId(),
+                target.getNamespace() + "." + target.getId(),
+                Constants.ROUTES_TO_RELATIONSHIP,
+                Constants.TECHNOLOGY_TCP_HTTP,
+                tag
+        );
+    }
+
+    private boolean isHttpUrl(String value) {
+        return value != null &&
+                (value.startsWith("http://") || value.startsWith("https://"));
     }
 
     public void addServiceRelationships() {
@@ -70,6 +123,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
     public void addAllRelationships() {
         addServiceRelationships();
+        addServiceToServiceRelationships();
         addHPARelationships();
         addPDBRelationships();
         addServiceAccountRelationships();
