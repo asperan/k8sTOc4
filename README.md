@@ -1,26 +1,19 @@
 # k8sToC4 CLI
 
-Tool CLI per convertire manifest Kubernetes in diagrammi C4 usando il DSL Structurizr.
+CLI tool to convert Kubernetes manifests into C4 diagrams using the LikeC4 DSL.
 
-## Descrizione
+Overview
+- The tool reads Kubernetes manifests (Deployment, Service, Ingress, ConfigMap, Secret, etc.), builds a C4 model, and outputs Structurizr DSL files (.c4).
+- Architecture is designed to be extensible via a Visitor pattern to support new Kubernetes resources.
+- Automatically maps resources to C4 components and establishes relationships such as:
+  - Service -> Pods (via selector)
+  - Ingress -> Service (HTTP routes)
+  - Pods -> ConfigMap (envFrom, valueFrom, volumes)
+  - Pods -> Secret (envFrom, valueFrom, volumes)
+  - Pods -> PersistentVolumeClaim (volumes)
+- Outputs DSL files suitable for Structurizr visualization.
 
-Questo tool trasforma risorse Kubernetes (Deployment, Service, Ingress, ConfigMap, Secret, ecc.) in diagrammi architetturali C4. Analizza i file YAML Kubernetes, crea un modello C4 rappresentativo e genera file `.c4` compatibili con gli strumenti di visualizzazione C4/Structurizr.
-
-## Funzionalità
-
-- **Parsing YAML Kubernetes**: Carica e interpreta manifest Kubernetes multipli
-- **Pattern Visitor**: Architettura estensibile per aggiungere nuovi tipi di risorse
-- **Mapping automatico**: Converte risorse K8s in componenti C4 con relazioni
-- **Relazioni automatiche**:
-  - Service → Pods (tramite selector)
-  - Ingress → Service (HTTP routes)
-  - Pods → ConfigMap (envFrom, env valueFrom)
-  - Pods → Secret (envFrom, env valueFrom, volumes)
-  - Pods → PersistentVolumeClaim (volumes)
-- **Generazione DSL**: Output in formato Structurizr DSL (.c4)
-
-## Risorse Kubernetes Supportate
-
+Supported Kubernetes resources
 - Deployment
 - StatefulSet
 - Service
@@ -28,136 +21,53 @@ Questo tool trasforma risorse Kubernetes (Deployment, Service, Ingress, ConfigMa
 - ConfigMap
 - Secret
 - PersistentVolumeClaim
-- Altre risorse generiche (fallback)
+- Other generic resources (fallback)
 
-## Prerequisiti
-
-- Java 17 o superiore
+Prerequisites
+- Java 21 or newer
 - Maven 3.x
 
-## Installazione
+Build
+- mvn -B -DskipTests=false package
+- The resulting executable JAR is generated under target/, e.g. target/k8stoc4-cli-1.0-SNAPSHOT.jar
 
-```bash
-git clone <repository-url>
-cd k8sTOc4
-mvn -B -DskipTests=false package
-```
+Usage
+- Base command: java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i <input-file.yaml>
+- Options:
+  * -i, --input: Kubernetes YAML input file (required)
+  * -o, --output: Output directory for .c4 files (optional)
 
-## Utilizzo
+Examples
+- Output to stdout:
+  java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i src/main/resources/microservice.yaml
+- Output to file:
+  java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i src/main/resources/complex.yaml -o ./output
 
-### Comando base
+This will generate:
+- output/spec.c4: C4 specifications
+- output/model.c4: C4 model with namespace, components, and relations
 
-```bash
-java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i <input-file.yaml>
-```
+Architecture (high level)
+- The project follows a modular structure under src/main/java:
+  - com.k8stoc4.cli: Entry point and commands (Main.java, ParseCommand.java)
+  - com.k8stoc4.model: C4Model, C4Namespace, C4Component, C4Relationship, Constants
+  - com.k8stoc4.visitor: Visitors to build the model (C4ModelBuilderVisitor, KubernetesResourceVisitor, etc.)
+  - com.k8stoc4.render: C4DslRenderer for Structurizr DSL output
+- Core ideas: Parser (Fabric8 Kubernetes Client), DSL template rendering (Mustache), and a Visitor-based model builder.
 
-### Opzioni
+Dependencies
+- Picocli 4.7.7: CLI framework
+- Fabric8 Kubernetes Client 7.4.0: Kubernetes resource parsing
+- Mustache 0.9.10: Template engine for DSL
+- Lombok 1.18.42: Boilerplate reduction
+- Logback 1.5.20: Logging
 
-- `-i, --input`: File YAML Kubernetes di input (richiesto)
-- `-o, --output`: Directory di output per i file .c4 (opzionale)
+Notes
+- The CLI jar is produced by the Maven Shade plugin; entry point is com.k8stoc4.cli.Main.
+- Version in this README refers to the current release artifact name: k8stoc4-cli-1.0-SNAPSHOT.jar
 
-### Esempi
+Contributing
+- See CONTRIBUTING.md for details on forking, branching, testing, and submitting PRs.
 
-**Output su stdout**:
-```bash
-java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i src/main/resources/microservice.yaml
-```
-
-**Output su file**:
-```bash
-java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar parse -i src/main/resources/complex.yaml -o ./output
-```
-
-Questo genererà:
-- `output/spec.c4`: Specificazione degli elementi C4
-- `output/model.c4`: Modello C4 con namespace, componenti e relazioni
-
-### Aiuto
-
-```bash
-java -jar target/k8stoc4-cli-1.0-SNAPSHOT.jar --help
-```
-
-## Architettura
-
-```
-src/main/java/
-└── com/k8stoc4/
-    ├── cli/
-    │   ├── Main.java                 # Entry point CLI
-    │   └── commands/
-    │       └── ParseCommand.java     # Comando parse
-    ├── model/
-    │   ├── C4Model.java              # Modello C4 principale
-    │   ├── C4Namespace.java          # Rappresenta un namespace K8s
-    │   ├── C4Component.java          # Rappresenta una risorsa K8s
-    │   ├── C4Relationship.java       # Relazione tra componenti
-    │   └── Constants.java            # Costanti utilizzate nel modello
-    ├── visitor/
-    │   ├── C4ModelBuilderVisitor.java # Visitor che costruisce il modello C4
-    │   ├── KubernetesResourceVisitor.java # Interface visitor
-    │   ├── K8sVisitable.java         # Adattatore per pattern Visitor
-    │   └── VisitorUtils.java         # Utilità per matching selector
-    └── render/
-        └── C4DslRenderer.java        # Renderer DSL Structurizr
-```
-
-## Dipendenze
-
-- **Picocli** 4.7.7: Framework CLI
-- **Fabric8 Kubernetes Client** 7.4.0: Parsing risorse Kubernetes
-- **Mustache** 0.9.10: Template engine per DSL
-- **Lombok** 1.18.42: Riduzione boilerplate code
-- **Logback** 1.5.20: Logging
-
-## Esempio di Output
-
-**spec.c4**:
-```c4
-specification {
-  element deployment
-  element service
-  element ingress
-}
-```
-
-**model.c4**:
-```c4
-namespace my-namespace {
-  deployment my-deployment 'my-deployment' {
-    technology "Deployment"
-    description "My application deployment"
-    metadata {
-      labels '
-        app: myapp
-        version: v1
-      '
-      annotations '
-      '
-    }
-  }
-  service my-service 'my-service' {
-    technology "Service"
-    description "Load balancer for my app"
-    metadata {
-      labels '
-      '
-      annotations '
-      '
-    }
-  }
-  my-namespace.service_my-service -> my-namespace.my-deployment
-}
-```
-
-## Come contribuire
-
-1. Fork del repository
-2. Creare branch feature (`git checkout -b feature/AmazingFeature`)
-3. Commit delle modifiche (`git commit -m 'Add AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Aprire una Pull Request
-
-## License
-
-Questo progetto è distribuito sotto la Apache License 2.0 - vedi il file LICENSE per dettagli.
+License
+- Apache License 2.0. See LICENSE for details.
