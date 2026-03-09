@@ -49,6 +49,7 @@ public class ParseCommand implements Runnable {
         final C4DslRenderer.Output renderOutput = new ParseController(input, defaultNs, groupByLabel).execute();
         if (output.isPresent()) {
             try {
+                Paths.get(output.get()).toFile().mkdirs();
                 Files.writeString(Paths.get(output.get(), "spec.c4"),
                         renderOutput.getModel(), StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING);
@@ -57,6 +58,8 @@ public class ParseCommand implements Runnable {
                         StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write output files", e);
+            } catch (SecurityException e) {
+                throw new RuntimeException("Failed to create output directory", e);
             }
         } else {
             System.out.println(renderOutput.getSpec());
