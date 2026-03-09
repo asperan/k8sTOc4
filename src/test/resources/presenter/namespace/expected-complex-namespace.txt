@@ -24,8 +24,8 @@ namespace complex {
         }
     }
     labelgroup layer_backend {
-        service service_backend 'backend' {
-            technology "Service"
+        configmap configmap_app-config 'app-config' {
+            technology "ConfigMap"
             description ""
             metadata {
                 labels '
@@ -46,8 +46,8 @@ namespace complex {
                 '
             }
         }
-        configmap configmap_app-config 'app-config' {
-            technology "ConfigMap"
+        service service_backend 'backend' {
+            technology "Service"
             description ""
             metadata {
                 labels '

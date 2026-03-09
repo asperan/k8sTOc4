@@ -3,11 +3,13 @@ package com.k8stoc4.render;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.k8stoc4.presenter.C4NamespacePresenter;
 import lombok.extern.slf4j.Slf4j;
 import com.k8stoc4.model.*;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class C4DslRenderer {
@@ -21,10 +23,10 @@ public class C4DslRenderer {
     // Render principale: workspace
     private String renderModel(C4Model model) {
         StringBuilder sb = new StringBuilder();
-        sb.append("model").append("{\n");
+        sb.append("model").append(" {\n");
         sb.append(renderClusterScoped(model));
         for (C4Namespace namespace : model.getNamespaces().values()) {
-            sb.append(renderNamespace(namespace));
+            sb.append(C4NamespacePresenter.present(namespace).lines().map(it -> "    " + it ).collect(Collectors.joining("\n"))).append("\n");
         }
         sb.append("}\n");
         return sb.toString();

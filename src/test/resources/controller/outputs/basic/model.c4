@@ -1,23 +1,23 @@
 model {
     namespace default {
-        service service_sample-app-service 'sample-app-service' {
-            technology "Service"
+        deployment deployment_sample-app 'sample-app' {
+            technology "Deployment"
             description ""
             metadata {
-              labels '
-              '
-              annotations '
-              '
+                labels '
+                    app: sample-app
+                '
+                annotations '
+                '
             }
         }
-        ingress ingress_sample-app-ingress 'sample-app-ingress' {
-            technology "Ingress"
+        service service_sample-app-service 'sample-app-service' {
+            technology "Service"
             description ""
             metadata {
                 labels '
                 '
                 annotations '
-                        nginx.ingress.kubernetes.io/rewrite-target: /
                 '
             }
         }
@@ -31,18 +31,17 @@ model {
                 '
             }
         }
-        deployment deployment_sample-app 'sample-app' {
-            technology "Deployment"
+        ingress ingress_sample-app-ingress 'sample-app-ingress' {
+            technology "Ingress"
             description ""
             metadata {
                 labels '
-                        app: sample-app
                 '
                 annotations '
+                    nginx.ingress.kubernetes.io/rewrite-target: /
                 '
             }
         }
-
         default.deployment_sample-app -> default.configmap_sample-config
         default.ingress_sample-app-ingress -> default.service_sample-app-service
         default.service_sample-app-service -> default.deployment_sample-app
