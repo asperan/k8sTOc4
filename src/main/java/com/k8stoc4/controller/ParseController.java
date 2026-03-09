@@ -10,27 +10,22 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
 public class ParseController {
 
     private final String input;
-    private final Optional<String> output;
     private final Optional<String> defaultNamespace;
     private final Optional<String> groupByLabel;
 
-    public ParseController(String input, Optional<String> output, Optional<String> defaultNamespace, Optional<String> groupByLabel) {
+    public ParseController(String input, Optional<String> defaultNamespace, Optional<String> groupByLabel) {
         this.input = input;
-        this.output = output;
         this.defaultNamespace = defaultNamespace;
         this.groupByLabel = groupByLabel;
     }
 
-    public void execute() {
+    public C4DslRenderer.Output execute() {
         try (KubernetesClient client = new KubernetesClientBuilder().build();
              FileInputStream fis = new FileInputStream(input)) {
 
@@ -42,22 +37,7 @@ public class ParseController {
             visitor.addAllRelationships();
             groupByLabel.ifPresent(visitor::groupComponentsByLabel);
             C4DslRenderer renderer=new C4DslRenderer();
-
-            if (output.isPresent()) {
-                try {
-                    Files.writeString(Paths.get(output.get(), "spec.c4"),
-                            renderer.renderSpec(visitor.getModel()), StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                    Files.writeString(Paths.get(output.get(), "model.c4"),
-                            renderer.renderModel(visitor.getModel()), StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to write output files", e);
-                }
-            } else {
-                System.out.println(renderer.renderSpec(visitor.getModel()));
-                System.out.println(renderer.renderModel(visitor.getModel()));
-            }
+            return renderer.render(visitor.getModel());
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Input file not found: " + input, e);
         } catch (IOException e) {

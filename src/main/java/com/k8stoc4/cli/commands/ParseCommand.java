@@ -1,8 +1,13 @@
 package com.k8stoc4.cli.commands;
 
 import com.k8stoc4.controller.ParseController;
+import com.k8stoc4.render.C4DslRenderer;
 import picocli.CommandLine;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 @CommandLine.Command(
@@ -41,6 +46,21 @@ public class ParseCommand implements Runnable {
 
     @Override
     public void run() {
-        new ParseController(input, output, defaultNs, groupByLabel).execute();
+        final C4DslRenderer.Output renderOutput = new ParseController(input, defaultNs, groupByLabel).execute();
+        if (output.isPresent()) {
+            try {
+                Files.writeString(Paths.get(output.get(), "spec.c4"),
+                        renderOutput.getModel(), StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
+                Files.writeString(Paths.get(output.get(), "model.c4"),
+                        renderOutput.getSpec(), StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write output files", e);
+            }
+        } else {
+            System.out.println(renderOutput.getSpec());
+            System.out.println(renderOutput.getModel());
+        }
     }
 }

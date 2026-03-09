@@ -14,8 +14,12 @@ public class C4DslRenderer {
 
     private static final MustacheFactory MF = new DefaultMustacheFactory();
 
+    public Output render(final C4Model model) {
+        return new Output(renderModel(model), renderSpec(model));
+    }
+
     // Render principale: workspace
-    public String renderModel(C4Model model) {
+    private String renderModel(C4Model model) {
         StringBuilder sb = new StringBuilder();
         sb.append("model").append("{\n");
         sb.append(renderClusterScoped(model));
@@ -174,7 +178,7 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    public String renderSpec(C4Model model) {
+    private String renderSpec(C4Model model) {
         StringBuilder sb = new StringBuilder();
         sb.append("specification ").append("{").append("\n");
         for (String elementName: model.getSpecifications()){
@@ -182,6 +186,20 @@ public class C4DslRenderer {
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    public static class Output {
+        private final String model;
+        private final String spec;
+
+        private Output(String model, String spec) {
+            this.model = model;
+            this.spec = spec;
+        }
+
+        public String getModel() { return this.model; }
+
+        public String getSpec() { return this.spec; }
     }
 
 }
