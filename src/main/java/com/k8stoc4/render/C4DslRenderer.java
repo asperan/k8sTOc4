@@ -99,7 +99,7 @@ public class C4DslRenderer {
         for (String elementName: model.getSpecifications()) {
             sb.append("    ").append("element").append(" ").append(elementName).append("\n");
         }
-        sb.append("}");
+        sb.append("}\n");
         return sb.toString();
     }
 
