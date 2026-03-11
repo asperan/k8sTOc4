@@ -425,6 +425,15 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                 replicaSet.getSpec().getTemplate().getMetadata().getLabels());
 
         namespace.addComponents(component);
+        replicaSet.getMetadata().getOwnerReferences().forEach(ownerReference -> {
+            final C4Relationship rel = new C4Relationship(
+                    namespace.getName() + "." + ownerReference.getKind().toLowerCase() + "_" + ownerReference.getName(),
+                    component.getNamespace() + "." + component.getId(),
+                    Constants.OWNER_RELATIONSHIP,
+                    "k8s"
+            );
+            namespace.addRelationship(rel);
+        });
     }
 
     @Override
@@ -443,6 +452,15 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                 pod.getMetadata().getLabels());
 
         namespace.addComponents(component);
+        pod.getMetadata().getOwnerReferences().forEach(ownerReference -> {
+            final C4Relationship rel = new C4Relationship(
+                    namespace.getName() + "." + ownerReference.getKind().toLowerCase() + "_" + ownerReference.getName(),
+                    component.getNamespace() + "." + component.getId(),
+                    Constants.OWNER_RELATIONSHIP,
+                    "k8s"
+            );
+            namespace.addRelationship(rel);
+        });
     }
 
     @Override

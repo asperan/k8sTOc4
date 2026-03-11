@@ -25,6 +25,7 @@ public class Constants {
     public static final String TECHNOLOGY_PV = "pv";
     public static final String TECHNOLOGY_STORAGECLASS = "storageclass";
     public static final String BUNDS_RELATIONSHIP = "binds";
+    public static final String OWNER_RELATIONSHIP = "controls";
 
     public static final Set<String> CLUSTER_SCOPED_RESOURCES = Set.of(
         "PersistentVolume",
