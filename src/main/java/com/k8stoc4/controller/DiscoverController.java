@@ -10,20 +10,17 @@ import java.util.List;
 import java.util.Optional;
 
 public class DiscoverController {
-
-    private final Optional<String> defaultNamespace;
     private final Optional<String> groupByLabel;
     private final ResourceProvider resourceProvider;
 
-    public DiscoverController(Optional<String> defaultNamespace, Optional<String> groupByLabel) {
-        this.defaultNamespace = defaultNamespace;
+    public DiscoverController(Optional<String> groupByLabel) {
         this.groupByLabel = groupByLabel;
         this.resourceProvider = new KubeApiServerInputProvider();
     }
 
     public C4DslRenderer.Output execute() {
         final List<HasMetadata> allResources = this.resourceProvider.resources();
-        final C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor(defaultNamespace);
+        final C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor();
         for (HasMetadata r : allResources) {
             VisitorUtils.accept(r, visitor);
         }

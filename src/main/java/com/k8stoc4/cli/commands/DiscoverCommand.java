@@ -23,13 +23,6 @@ public class DiscoverCommand implements Runnable {
     private Optional<String> output;
 
     @CommandLine.Option(
-            names = {"-n", "--namespace"},
-            description = "force namespace",
-            required = false
-    )
-    private Optional<String> defaultNs;
-
-    @CommandLine.Option(
             names = {"-g","--group-by-label"},
             description = "label key for grouping (e.g. app.kubernetes.io/name, app)",
             required = false
@@ -38,7 +31,7 @@ public class DiscoverCommand implements Runnable {
 
     @Override
     public void run() {
-        final C4DslRenderer.Output renderOutput = new DiscoverController(defaultNs, groupByLabel).execute();
+        final C4DslRenderer.Output renderOutput = new DiscoverController(groupByLabel).execute();
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
         writer.write(renderOutput);
     }
