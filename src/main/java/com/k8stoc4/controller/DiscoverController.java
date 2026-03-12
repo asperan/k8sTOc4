@@ -9,13 +9,13 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import java.util.List;
 import java.util.Optional;
 
-public class ServeController {
+public class DiscoverController {
 
     private final Optional<String> defaultNamespace;
     private final Optional<String> groupByLabel;
     private final ResourceProvider resourceProvider;
 
-    public ServeController(Optional<String> defaultNamespace, Optional<String> groupByLabel) {
+    public DiscoverController(Optional<String> defaultNamespace, Optional<String> groupByLabel) {
         this.defaultNamespace = defaultNamespace;
         this.groupByLabel = groupByLabel;
         this.resourceProvider = new KubeApiServerInputProvider();

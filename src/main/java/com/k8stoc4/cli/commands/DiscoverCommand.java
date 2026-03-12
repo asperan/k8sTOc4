@@ -1,7 +1,7 @@
 package com.k8stoc4.cli.commands;
 
 import com.k8stoc4.controller.RenderOutputWriter;
-import com.k8stoc4.controller.ServeController;
+import com.k8stoc4.controller.DiscoverController;
 import com.k8stoc4.controller.writer.FileWriter;
 import com.k8stoc4.controller.writer.SystemOutWriter;
 import com.k8stoc4.render.C4DslRenderer;
@@ -10,10 +10,10 @@ import picocli.CommandLine;
 import java.util.Optional;
 
 @CommandLine.Command(
-        name = "serve",
-        description = "serve the cluster status"
+        name = "discover",
+        description = "discover the cluster status"
 )
-public class ServeCommand implements Runnable {
+public class DiscoverCommand implements Runnable {
 
     @CommandLine.Option(
             names = {"-o", "--output"},
@@ -38,7 +38,7 @@ public class ServeCommand implements Runnable {
 
     @Override
     public void run() {
-        final C4DslRenderer.Output renderOutput = new ServeController(defaultNs, groupByLabel).execute();
+        final C4DslRenderer.Output renderOutput = new DiscoverController(defaultNs, groupByLabel).execute();
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
         writer.write(renderOutput);
     }

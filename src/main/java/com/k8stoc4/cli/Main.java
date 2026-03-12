@@ -1,7 +1,7 @@
 package com.k8stoc4.cli;
 
 import com.k8stoc4.cli.commands.ParseCommand;
-import com.k8stoc4.cli.commands.ServeCommand;
+import com.k8stoc4.cli.commands.DiscoverCommand;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -9,7 +9,7 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         version = "1.0",
         description = "CLI tool per convertire manifest Kubernetes in diagrammi C4",
-        subcommands = {ParseCommand.class, ServeCommand.class}
+        subcommands = {ParseCommand.class, DiscoverCommand.class}
 )
 public class Main implements Runnable {
 
