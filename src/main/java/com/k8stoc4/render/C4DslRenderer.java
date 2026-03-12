@@ -71,15 +71,18 @@ public class C4DslRenderer {
         StringBuilder sb = new StringBuilder();
         sb.append("views {\n");
         sb.append("    view namespaces {\n");
+        sb.append("        title 'Overviews / Namespaces'\n");
         sb.append("        include *\n");
         sb.append("            where kind is namespace\n");
         sb.append("    }\n");
         sb.append("    view nodes {\n");
+        sb.append("        title 'Overviews / Nodes'\n");
         sb.append("        include ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
         sb.append("        include ").append(model.getNamespaces().values().stream().map(namespace -> namespace.getName() + "._").collect(Collectors.joining(", "))).append("\n");
         sb.append("    }\n");
         for (C4Namespace namespace : model.getNamespaces().values()) {
             sb.append("    view of ").append(namespace.getName()).append(" {\n");
+            sb.append("        title 'Namespaces / ").append(namespace.getName()).append("'\n");
             sb.append("        include *\n");
             sb.append("        exclude ").append(nodes.stream().map(n -> n.getId()).collect(Collectors.joining(", "))).append("\n");
             sb.append("    }\n");
