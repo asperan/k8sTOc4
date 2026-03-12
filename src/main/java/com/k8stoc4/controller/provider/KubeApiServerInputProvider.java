@@ -21,6 +21,7 @@ public class KubeApiServerInputProvider implements ResourceProvider {
             allResources.addAll(client.apps().daemonSets().inAnyNamespace().list().getItems());
             allResources.addAll(client.batch().v1().jobs().inAnyNamespace().list().getItems());
             allResources.addAll(client.configMaps().inAnyNamespace().list().getItems());
+            allResources.addAll(client.nodes().list().getItems());
             return allResources;
         }
     }
