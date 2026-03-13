@@ -18,7 +18,7 @@ import java.util.Optional;
 @ToString
 public class C4Component {
 
-    private String namespace = Constants.DEFAULT_NAMESPACE;
+    private String namespace;
     private String name;
     private String id;
     private String image;

@@ -17,7 +17,7 @@ public class K8sToC4ControllerTest {
 
     public K8sToC4ControllerTest() {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        this.input = classloader.getResource("controller/inputs/basic-input.yaml").getFile();
+        this.input = Objects.requireNonNull(classloader.getResource("controller/inputs/basic-input.yaml")).getFile();
     }
 
     @Test

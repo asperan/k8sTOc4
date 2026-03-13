@@ -22,11 +22,12 @@ public class C4ComponentPresenterTest {
     @SneakyThrows
     @Test
     public void testSimpleComponent() {
-        final KubernetesClient client = new KubernetesClientBuilder().build();
-        InputStream fis = classloader.getResourceAsStream("presenter/bases/simple-component.yaml");
-        final List<HasMetadata> resources = client.load(fis).items();
-        final C4Component component = new C4Component(resources.get(0), "default", "simple-component", "Pod");
-        final String expected = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("presenter/component/expected-simple-component.txt")))).lines().collect(Collectors.joining("\n")) + "\n";
-        assertEquals(expected, C4ComponentPresenter.present(component));
+        try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
+            InputStream fis = classloader.getResourceAsStream("presenter/bases/simple-component.yaml");
+            final List<HasMetadata> resources = client.load(fis).items();
+            final C4Component component = new C4Component(resources.get(0), "default", "simple-component", "Pod");
+            final String expected = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("presenter/component/expected-simple-component.txt")))).lines().collect(Collectors.joining("\n")) + "\n";
+            assertEquals(expected, C4ComponentPresenter.present(component));
+        }
     }
 }

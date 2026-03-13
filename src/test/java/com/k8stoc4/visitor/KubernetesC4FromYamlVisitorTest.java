@@ -52,7 +52,7 @@ class KubernetesC4FromYamlVisitorTest {
     }
 
     private void verifyClusterScoped(C4Model model) {
-        assertTrue(model.getClusterScopedComponents().size() > 0, "Should have cluster-scoped components");
+        assertFalse(model.getClusterScopedComponents().isEmpty(), "Should have cluster-scoped components");
 
         C4Component pv = model.getClusterScopedComponents().stream()
                 .filter(c -> c.getKind().equals("PersistentVolume"))

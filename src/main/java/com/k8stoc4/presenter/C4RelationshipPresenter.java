@@ -9,7 +9,7 @@ public class C4RelationshipPresenter {
         if (!relationship.getDescription().isBlank() || !relationship.getTechnology().isBlank() || !relationship.getTag().isBlank()) {
             sb.append(" {\n");
             if (!relationship.getTag().isBlank()) {
-                sb.append("    ").append(relationship.getTag()).append("\n");
+                sb.append("    #").append(relationship.getTag()).append("\n");
             }
             if (!relationship.getDescription().isBlank()) {
                 sb.append("    description '").append(relationship.getDescription()).append("'\n");

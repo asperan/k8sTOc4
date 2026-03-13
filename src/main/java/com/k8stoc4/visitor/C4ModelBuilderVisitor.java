@@ -1,5 +1,11 @@
 package com.k8stoc4.visitor;
 
+import com.k8stoc4.model.C4Component;
+import com.k8stoc4.model.C4LabelGroup;
+import com.k8stoc4.model.C4Model;
+import com.k8stoc4.model.C4Namespace;
+import com.k8stoc4.model.C4Relationship;
+import com.k8stoc4.model.Constants;
 import com.k8stoc4.presenter.PresenterUtils;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -12,11 +18,11 @@ import io.fabric8.kubernetes.api.model.networking.v1.NetworkPolicy;
 import io.fabric8.kubernetes.api.model.policy.v1.PodDisruptionBudget;
 import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import com.k8stoc4.model.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -283,7 +289,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                                             servicesByFqdn.forEach((fqdn, service) -> {
                                                 if (value.contains(fqdn)) {
                                                     namespace.addRelationship(
-                                                            buildRelationship(component, service,"#service2Service")
+                                                            buildRelationship(component, service,Constants.SERVICE2SERVICE_TAG)
                                                     );
                                                 }
                                             })

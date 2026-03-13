@@ -5,7 +5,6 @@ import com.k8stoc4.model.C4LabelGroup;
 import com.k8stoc4.model.C4Namespace;
 import com.k8stoc4.model.C4Relationship;
 
-import java.util.*;
 import java.util.stream.Collectors;
 
 public class C4NamespacePresenter {

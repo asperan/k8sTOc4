@@ -14,4 +14,5 @@ specification {
     element horizontalpodautoscaler
     element poddisruptionbudget
     element daemonset
+    tag service2service
 }

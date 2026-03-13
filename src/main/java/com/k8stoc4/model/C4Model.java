@@ -1,10 +1,12 @@
 package com.k8stoc4.model;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -18,7 +20,6 @@ public  class C4Model {
     public C4Model(){
         specifications.add("namespace");
     }
-    public void addNamespace( C4Namespace s) { namespaces.put(s.getName(),s);}
 
     public void addRelationship(C4Relationship r) { relationships.add(r); }
 

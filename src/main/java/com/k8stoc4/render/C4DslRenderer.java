@@ -47,21 +47,13 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    public String renderRelations(C4Model model) {
-        StringBuilder sb = new StringBuilder();
-        for (C4Relationship rel: model.getRelationships()){
-            sb.append(rel.getSource()).append(" -> ").append(rel.getTarget()).append("\n");
-        }
-
-        return sb.toString();
-    }
-
     private String renderSpec(C4Model model) {
         StringBuilder sb = new StringBuilder();
         sb.append("specification ").append("{").append("\n");
         for (String elementName: model.getSpecifications()) {
             sb.append("    ").append("element").append(" ").append(elementName).append("\n");
         }
+        sb.append("    ").append("tag").append(" ").append(Constants.SERVICE2SERVICE_TAG).append("\n");
         sb.append("}\n");
         return sb.toString();
     }
@@ -84,7 +76,7 @@ public class C4DslRenderer {
             sb.append("    view of ").append(namespace.getName()).append(" {\n");
             sb.append("        title 'Namespaces / ").append(namespace.getName()).append("'\n");
             sb.append("        include *\n");
-            sb.append("        exclude ").append(nodes.stream().map(n -> n.getId()).collect(Collectors.joining(", "))).append("\n");
+            sb.append("        exclude ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
             sb.append("    }\n");
         }
         sb.append("}\n");
