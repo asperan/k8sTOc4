@@ -588,7 +588,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     private void processPodSpec(C4Namespace namespace, C4Component component, PodSpec podSpec, Map<String, String> labels) {
         if (podSpec != null && podSpec.getContainers() != null) {
             Container c = podSpec.getContainers().get(0);
-            component.setImage(c.getImage());
+            component.setImage(Optional.of(c.getImage()));
             component.getResource().getMetadata().getLabels().putAll(labels);
 
             if (c.getEnvFrom() != null) {

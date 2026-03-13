@@ -92,6 +92,7 @@ model {
             technology "StatefulSet"
             description ""
             metadata {
+                image 'postgres:14'
                 labels '
                     app: postgres
                 '
@@ -114,6 +115,7 @@ model {
             technology "Deployment"
             description ""
             metadata {
+                image 'redis:7'
                 labels '
                     app: redis
                 '
@@ -135,6 +137,7 @@ model {
             technology "Deployment"
             description ""
             metadata {
+                image 'rabbitmq:3-management'
                 labels '
                     app: rabbitmq
                 '
@@ -157,6 +160,7 @@ model {
             technology "Deployment"
             description ""
             metadata {
+                image 'yourorg/backend:1.0'
                 labels '
                     app: backend
                 '
@@ -179,6 +183,7 @@ model {
             technology "Deployment"
             description ""
             metadata {
+                image 'yourorg/auth:1.0'
                 labels '
                     app: auth
                 '
@@ -201,6 +206,7 @@ model {
             technology "Deployment"
             description ""
             metadata {
+                image 'nginx:stable'
                 labels '
                     app: frontend
                 '

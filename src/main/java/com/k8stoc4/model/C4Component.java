@@ -21,7 +21,7 @@ public class C4Component {
     private String namespace;
     private String name;
     private String id;
-    private String image;
+    private Optional<String> image;
     private String kind;
     private String description = "";
     private Map<String, String> env = new LinkedHashMap<>();
@@ -33,5 +33,6 @@ public class C4Component {
         this.id = kind.toLowerCase() + "_" + PresenterUtils.sanitizeComponentId(name);
         this.name = name;
         this.kind = kind;
+        this.image = Optional.empty();
     }
 }
