@@ -50,6 +50,13 @@ public class C4DslRenderer {
     private String renderSpec(C4Model model) {
         StringBuilder sb = new StringBuilder();
         sb.append("specification ").append("{").append("\n");
+        sb.append("    element ").append(Constants.MISSING_TYPE).append(" {\n");
+        sb.append("        style {\n");
+        sb.append("            color red\n");
+        sb.append("            icon bootstrap:question-square\n");
+        sb.append("            iconColor black\n");
+        sb.append("        }\n");
+        sb.append("    }\n");
         for (String elementName: model.getSpecifications()) {
             sb.append("    ").append("element").append(" ").append(elementName).append("\n");
         }
