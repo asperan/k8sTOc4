@@ -29,6 +29,11 @@ public class C4ComponentPresenter {
             }
             sb.append("        '\n");
         }
+        component.getAdditionalMetadata().forEach((key, value) -> {
+            sb.append("        ").append(key).append(" '\n");
+            sb.append("            ").append(value).append("\n");
+            sb.append("        '\n");
+        });
         sb.append("    }\n");
         sb.append("}\n");
         return sb.toString();

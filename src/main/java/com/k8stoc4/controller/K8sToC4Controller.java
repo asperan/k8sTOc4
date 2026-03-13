@@ -13,11 +13,13 @@ public final class K8sToC4Controller {
     private final Optional<String> defaultNamespace;
     private final Optional<String> groupByLabel;
     private final ResourceProvider resourceProvider;
+    private final boolean rewriteMissing;
 
-    public K8sToC4Controller(ResourceProvider resourceProvider, Optional<String> defaultNamespace, Optional<String> groupByLabel) {
+    public K8sToC4Controller(ResourceProvider resourceProvider, Optional<String> defaultNamespace, Optional<String> groupByLabel, boolean rewriteMissing) {
         this.defaultNamespace = defaultNamespace;
         this.groupByLabel = groupByLabel;
         this.resourceProvider = resourceProvider;
+        this.rewriteMissing = rewriteMissing;
     }
 
     public C4DslRenderer.Output execute() {
@@ -31,6 +33,9 @@ public final class K8sToC4Controller {
             VisitorUtils.accept(r, visitor);
         }
         visitor.addAllRelationships();
+        if (this.rewriteMissing) {
+            visitor.addMissingReferencedComponents();
+        }
         groupByLabel.ifPresent(visitor::groupComponentsByLabel);
         final C4DslRenderer renderer = new C4DslRenderer();
         return renderer.render(visitor.getModel());

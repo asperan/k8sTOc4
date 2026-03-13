@@ -6,6 +6,7 @@ import lombok.ToString;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,4 +38,16 @@ public  class C4Model {
                 .collect(Collectors.toSet());
     }
 
+    public Optional<C4Component> searchComponentByRef(final String ref) {
+        if (ref.contains(".")) {
+            final String[] splitRef = ref.split("\\.", 2);
+            if (this.getNamespaces().containsKey(splitRef[0])) {
+                return this.getNamespaces().get(splitRef[0]).getComponents().stream().filter(c -> c.getId().equals(splitRef[1])).findFirst();
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return this.getClusterScopedComponents().stream().filter(c -> c.getId().equals(ref)).findFirst();
+        }
+    }
  }

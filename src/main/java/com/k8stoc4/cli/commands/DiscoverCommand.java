@@ -37,9 +37,17 @@ public class DiscoverCommand implements Runnable {
     )
     private Optional<Integer> refreshInterval;
 
+    @CommandLine.Option(
+            names = {"--rewrite-missing"},
+            description = "Whether to create entities for missing referenced objects.",
+            defaultValue = "false",
+            required = false
+    )
+    private boolean rewriteMissing;
+
     @Override
     public void run() {
-        final K8sToC4Controller controller = new K8sToC4Controller(new KubeApiServerInputProvider(), Optional.empty(), groupByLabel);
+        final K8sToC4Controller controller = new K8sToC4Controller(new KubeApiServerInputProvider(), Optional.empty(), groupByLabel, rewriteMissing);
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
 
         if (refreshInterval.isPresent()) {

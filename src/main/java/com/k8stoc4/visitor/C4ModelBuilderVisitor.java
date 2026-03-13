@@ -21,8 +21,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -75,6 +77,39 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                 }
             }
         }
+    }
+
+    public void addMissingReferencedComponents() {
+        this.model.getNamespaces().values().forEach(namespace -> {
+            final Set<C4Component> missingComponents = new LinkedHashSet<>();
+            final Set<C4Relationship> newRelationships = new LinkedHashSet<>();
+            final Set<C4Relationship> faultyRelationships = new LinkedHashSet<>();
+            for (final C4Relationship relationship : namespace.getRelationships()) {
+                String newSource = relationship.getSource();
+                if (this.model.searchComponentByRef(relationship.getSource()).isEmpty()) {
+                    final String[] splitSourceRef = relationship.getSource().split("_", 2);
+                    final C4Component missingComponent = C4Component.missing(namespace.getName(), splitSourceRef[1], Constants.MISSING_TYPE);
+                    missingComponent.getAdditionalMetadata().put("typeHint", splitSourceRef[0].split("\\.", 2)[1]);
+                    missingComponents.add(missingComponent);
+                    newSource = missingComponent.getNamespace() + "." + missingComponent.getId();
+                }
+                String newTarget = relationship.getTarget();
+                if (this.model.searchComponentByRef(relationship.getTarget()).isEmpty()) {
+                    final String[] splitTargetRef = relationship.getTarget().split("_", 2);
+                    final C4Component missingComponent = C4Component.missing(namespace.getName(), splitTargetRef[1], Constants.MISSING_TYPE);
+                    missingComponent.getAdditionalMetadata().put("typeHint", splitTargetRef[0].split("\\.", 2)[1]);
+                    missingComponents.add(missingComponent);
+                    newTarget = missingComponent.getNamespace() + "." + missingComponent.getId();
+                }
+                if (!newSource.equals(relationship.getSource()) || !newTarget.equals(relationship.getTarget())) {
+                    faultyRelationships.add(relationship);
+                    newRelationships.add(new C4Relationship(newSource, newTarget, relationship.getDescription(), relationship.getTechnology(), relationship.getTag()));
+                }
+            }
+            namespace.getRelationships().removeAll(faultyRelationships);
+            namespace.getRelationships().addAll(newRelationships);
+            namespace.getComponents().addAll(missingComponents);
+        });
     }
 
     @Override
@@ -638,7 +673,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
 
         if (!target.isEmpty()) {
-            namespace.addRelationship(new C4Relationship(source, target, Constants.MOUNT_RELATIONSHIP, Constants.VOLUME_TECHNOLOGY));
+            namespace.addRelationship(new C4Relationship(source, PresenterUtils.sanitizeNamespacedId(target), Constants.MOUNT_RELATIONSHIP, Constants.VOLUME_TECHNOLOGY));
         }
     }
 

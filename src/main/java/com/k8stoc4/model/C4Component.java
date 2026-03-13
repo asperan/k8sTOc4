@@ -20,6 +20,7 @@ public class C4Component {
     private final HasMetadata resource;
     private final Map<String, String> containerImages = new LinkedHashMap<>();
     private final Map<String, String> env = new LinkedHashMap<>();
+    private final Map<String, String> additionalMetadata = new LinkedHashMap<>();
     @Setter
     private String description = "";
     @Setter
@@ -31,5 +32,9 @@ public class C4Component {
         this.id = kind.toLowerCase() + "_" + PresenterUtils.sanitizeComponentId(name);
         this.name = name;
         this.kind = kind;
+    }
+
+    public static C4Component missing(final String namespace, final String name, final String kind) {
+        return new C4Component(null, namespace, name, kind);
     }
 }

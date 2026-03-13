@@ -44,9 +44,17 @@ public class ParseCommand implements Runnable {
     )
     private Optional<String> groupByLabel;
 
+    @CommandLine.Option(
+            names = {"--rewrite-missing"},
+            description = "Whether to create entities for missing referenced objects.",
+            defaultValue = "false",
+            required = false
+    )
+    private boolean rewriteMissing;
+
     @Override
     public void run() {
-        final C4DslRenderer.Output renderOutput = new K8sToC4Controller(new FileInputProvider(input), defaultNs, groupByLabel).execute();
+        final C4DslRenderer.Output renderOutput = new K8sToC4Controller(new FileInputProvider(input), defaultNs, groupByLabel, rewriteMissing).execute();
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
         writer.write(renderOutput);
     }
