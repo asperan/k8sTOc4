@@ -548,7 +548,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                             C4Relationship rel = new C4Relationship(
                                     scComponent.getId(),
                                     pvComponent.getId(),
-                                    Constants.BUNDS_RELATIONSHIP,
+                                    Constants.BINDS_RELATIONSHIP,
                                     Constants.TECHNOLOGY_STORAGECLASS
                             );
                             model.addRelationship(rel);

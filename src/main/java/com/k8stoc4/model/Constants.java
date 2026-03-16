@@ -24,7 +24,7 @@ public class Constants {
     public static final String BOUNDS_RELATIONSHIP = "bounds";
     public static final String TECHNOLOGY_PV = "pv";
     public static final String TECHNOLOGY_STORAGECLASS = "storageclass";
-    public static final String BUNDS_RELATIONSHIP = "binds";
+    public static final String BINDS_RELATIONSHIP = "binds";
     public static final String OWNER_RELATIONSHIP = "controls";
     public static final String K8S_TECHNOLOGY = "k8s";
     public static final String SERVICE2SERVICE_TAG = "service2service";
