@@ -11,9 +11,9 @@ import java.nio.file.StandardOpenOption;
 
 public class FileWriter implements RenderOutputWriter {
     private final String outputDir;
-    private final static String SPEC_FILE = "spec.c4";
-    private final static String MODEL_FILE = "model.c4";
-    private final static String VIEW_FILE = "view.c4";
+    private static final String SPEC_FILE = "spec.c4";
+    private static final String MODEL_FILE = "model.c4";
+    private static final String VIEW_FILE = "view.c4";
 
     public FileWriter(final String outputDir) {
         this.outputDir = outputDir;
