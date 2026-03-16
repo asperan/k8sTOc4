@@ -18,9 +18,7 @@ public  class C4Model {
     private final Set<String> specifications = new LinkedHashSet<>();
     private final Set<C4Relationship> relationships = new LinkedHashSet<>();
 
-    public C4Model(){
-        specifications.add("namespace");
-    }
+    public C4Model(){ }
 
     public void addRelationship(C4Relationship r) { relationships.add(r); }
 
