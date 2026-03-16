@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class C4LabelGroupPresenterTest {
+class C4LabelGroupPresenterTest {
     final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
     @SneakyThrows
     @Test
-    public void testLabelGroup() {
+    void testLabelGroup() {
         try(final KubernetesClient client = new KubernetesClientBuilder().build()) {
             InputStream fis = classloader.getResourceAsStream("presenter/bases/simple-component.yaml");
             final List<HasMetadata> resources = client.load(fis).items();

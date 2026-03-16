@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class C4NamespacePresenterTest {
+class C4NamespacePresenterTest {
     final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
     @SneakyThrows
     @Test
-    public void testSimpleNamespace() {
+    void testSimpleNamespace() {
         final KubernetesClient client = new KubernetesClientBuilder().build();
         InputStream fis = classloader.getResourceAsStream("presenter/bases/simple-component.yaml");
         final List<HasMetadata> resources = client.load(fis).items();
@@ -38,7 +38,7 @@ public class C4NamespacePresenterTest {
 
     @SneakyThrows
     @Test
-    public void testComplexNamespace() {
+    void testComplexNamespace() {
         final KubernetesClient client = new KubernetesClientBuilder().build();
         InputStream fis = classloader.getResourceAsStream("presenter/bases/microservice.yaml");
         final HasMetadata spuriousPod = client.load(classloader.getResourceAsStream("presenter/bases/simple-component.yaml")).items().get(0);

@@ -531,20 +531,28 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addStorageClassRelationships() {
-        log.info("Adding StorageClass relationships. Cluster scoped components: {}", model.getClusterScopedComponents().size());
+        if (log.isInfoEnabled()) {
+            log.info("Adding StorageClass relationships. Cluster scoped components: {}", model.getClusterScopedComponents().size());
+        }
 
         for (C4Component scComponent : model.getClusterScopedComponents()) {
             if (scComponent.getResource() instanceof StorageClass sc) {
                 String scName = sc.getMetadata().getName();
-                log.info("Found StorageClass: {}", scName);
+                if (log.isInfoEnabled()) {
+                    log.info("Found StorageClass: {}", scName);
+                }
 
                 for (C4Component pvComponent : model.getClusterScopedComponents()) {
                     if (pvComponent.getResource() instanceof PersistentVolume pv) {
                         String pvStorageClassName = pv.getSpec().getStorageClassName();
-                        log.info("PV {} has storageClassName: {}", pvComponent.getId(), pvStorageClassName);
+                        if (log.isInfoEnabled()) {
+                            log.info("PV {} has storageClassName: {}", pvComponent.getId(), pvStorageClassName);
+                        }
 
                         if (pvStorageClassName != null && pvStorageClassName.equals(scName)) {
-                            log.info("Creating relationship: {} -> {} (binds)", scComponent.getId(), pvComponent.getId());
+                            if (log.isInfoEnabled()) {
+                                log.info("Creating relationship: {} -> {} (binds)", scComponent.getId(), pvComponent.getId());
+                            }
                             C4Relationship rel = new C4Relationship(
                                     scComponent.getId(),
                                     pvComponent.getId(),
@@ -552,7 +560,9 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                                     Constants.TECHNOLOGY_STORAGECLASS
                             );
                             model.addRelationship(rel);
-                            log.info("Relationship added successfully");
+                            if (log.isInfoEnabled()) {
+                                log.info("Relationship added successfully");
+                            }
                         }
                     }
                 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class K8sToC4ControllerTest {
+class K8sToC4ControllerTest {
     private final String input;
 
     public K8sToC4ControllerTest() {
@@ -21,7 +21,7 @@ public class K8sToC4ControllerTest {
     }
 
     @Test
-    public void testBasicInput() {
+    void testBasicInput() {
         final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         final String expectedSpec = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("controller/outputs/basic/spec.c4")))).lines().collect(Collectors.joining("\n")) + "\n";
         final String expectedModel = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("controller/outputs/basic/model.c4")))).lines().collect(Collectors.joining("\n")) + "\n";

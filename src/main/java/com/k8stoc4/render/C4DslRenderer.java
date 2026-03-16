@@ -67,7 +67,7 @@ public class C4DslRenderer {
         sb.append("        }\n");
         sb.append("    }\n");
         for (String elementName: model.getSpecifications()) {
-            if (!elementName.equals("namespace")) {
+            if (!"namespace".equals(elementName)) {
                 sb.append(INDENT_STRING).append("element ").append(elementName).append("\n");
             }
         }
