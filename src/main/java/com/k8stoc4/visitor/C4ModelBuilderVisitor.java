@@ -211,11 +211,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         model.getSpecifications().add(ing.getKind().toLowerCase());
         String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
-        C4Component ingress =
-                new C4Component(ing,
-                        defaultNS.equals(Constants.DEFAULT_NAMESPACE)? ing.getMetadata().getNamespace():defaultNS,
-                        ing.getMetadata().getName(),
-                        ing.getKind());
+        C4Component ingress = new C4Component(ing, ns, ing.getMetadata().getName(), ing.getKind());
         namespace.addComponents(ingress);
 
         for (IngressRule rule : ing.getSpec().getRules()) {
@@ -236,8 +232,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         model.getSpecifications().add(ing.getKind().toLowerCase());
         String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
-        C4Component ingress = new C4Component(ing, defaultNS.equals(Constants.DEFAULT_NAMESPACE)? ing.getMetadata().getNamespace():defaultNS,
-                ing.getMetadata().getName(), ing.getKind());
+        C4Component ingress = new C4Component(ing, ns, ing.getMetadata().getName(), ing.getKind());
         namespace.addComponents(ingress);
 
         for (io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule rule : ing.getSpec().getRules()) {
@@ -258,8 +253,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         model.getSpecifications().add(ing.getKind().toLowerCase());
         String ns = Optional.ofNullable(ing.getMetadata().getNamespace()).orElse(defaultNS);
         C4Namespace namespace = getOrCreateSystem(ns);
-        C4Component ingress = new C4Component(ing, ing.getMetadata().getNamespace(),
-                ing.getMetadata().getName(), ing.getKind());
+        C4Component ingress = new C4Component(ing, ns, ing.getMetadata().getName(), ing.getKind());
         ingress.setDescription(ing.getSpec().getRules().get(0).getHost());
         namespace.addComponents(ingress);
 
