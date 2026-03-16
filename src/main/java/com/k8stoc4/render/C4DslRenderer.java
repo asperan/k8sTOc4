@@ -1,187 +1,126 @@
 package com.k8stoc4.render;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
+import com.k8stoc4.model.C4Component;
+import com.k8stoc4.model.C4Model;
+import com.k8stoc4.model.C4Namespace;
+import com.k8stoc4.model.C4Relationship;
+import com.k8stoc4.model.Constants;
+import com.k8stoc4.presenter.C4ComponentPresenter;
+import com.k8stoc4.presenter.C4NamespacePresenter;
+import com.k8stoc4.presenter.C4RelationshipPresenter;
 import lombok.extern.slf4j.Slf4j;
-import com.k8stoc4.model.*;
 
-import java.io.StringWriter;
-import java.util.*;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class C4DslRenderer {
+    public C4DslRenderer() {}
 
-    private static final MustacheFactory MF = new DefaultMustacheFactory();
+    public Output render(final C4Model model) {
+        return new Output(renderModel(model), renderSpec(model), renderViews(model));
+    }
 
     // Render principale: workspace
-    public String renderModel(C4Model model) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("model").append("{\n");
+    private String renderModel(final C4Model model) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("model {\n");
         sb.append(renderClusterScoped(model));
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            sb.append(renderNamespace(namespace));
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            sb.append(C4NamespacePresenter.present(namespace).lines().map(it -> Constants.INDENT + it ).collect(Collectors.joining("\n"))).append("\n");
         }
         sb.append("}\n");
         return sb.toString();
     }
 
-    private String renderClusterScoped(C4Model model) {
+    private String renderClusterScoped(final C4Model model) {
         if (model.getClusterScopedComponents() == null || model.getClusterScopedComponents().isEmpty()) {
             return "";
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("  // Cluster-scoped resources\n");
-
-        List<Map<String, Object>> comps = model.getClusterScopedComponents().stream()
-                .map(c -> {
-                    Map<String, Object> modelData = new HashMap<>();
-                    modelData.put("kind", c.getKind().toLowerCase());
-                    modelData.put("id", c.getId().replace(".", "-"));
-                    modelData.put("name", c.getName());
-                    modelData.put("technology", c.getKind());
-                    modelData.put("description", c.getDescription());
-
-                    modelData.put(
-                            "labels",
-                            Optional.ofNullable(c.getLabels()).orElse(Map.of()).entrySet().stream()
-                                    .map(e -> Map.of(
-                                            "key", e.getKey(),
-                                            "value", e.getValue()
-                                    ))
-                                    .toList()
-                    );
-
-                    modelData.put(
-                            "annotations",
-                            Optional.ofNullable(c.getAnnotations()).orElse(Map.of()).entrySet().stream()
-                                    .map(e -> Map.of(
-                                            "key", e.getKey(),
-                                            "value", e.getValue()
-                                    ))
-                                    .toList()
-                    );
-
-                    return modelData;
-                })
-                .toList();
-
-        for (Map<String, Object> comp : comps) {
-            sb.append("  ").append(comp.get("kind")).append(" ").append(comp.get("id")).append(" '").append(comp.get("name")).append("' {\n");
-            sb.append("    technology \"").append(comp.get("technology")).append("\"\n");
-            sb.append("    description \"").append(comp.get("description")).append("\"\n");
-            sb.append("  }\n");
+        final StringBuilder sb = new StringBuilder();
+        sb.append(Constants.INDENT).append("// Cluster-scoped resources\n");
+        for (final C4Component component : model.getClusterScopedComponents()) {
+            sb.append(C4ComponentPresenter.present(component).lines().map(it -> Constants.INDENT + it).collect(Collectors.joining("\n"))).append("\n");
         }
-
-        sb.append("  // Cross-scope relationships\n");
-        List<C4Relationship> modelRelationships = new ArrayList<>(model.getRelationships());
-        sb.append("  // Total model relationships: ").append(modelRelationships.size()).append("\n");
-        for (C4Relationship rel : modelRelationships) {
-            sb.append("  ").append(rel.getSource()).append(" -> ").append(rel.getTarget()).append("\n");
+        sb.append(Constants.INDENT).append("// Cross-scope relationships\n");
+        sb.append(Constants.INDENT).append("// Total model relationships: ").append(model.getRelationships().size()).append("\n");
+        for (final C4Relationship relationship : model.getRelationships()) {
+            sb.append(C4RelationshipPresenter.present(relationship).lines().map(it -> Constants.INDENT + it).collect(Collectors.joining("\n"))).append("\n");
         }
 
         return sb.toString();
     }
 
-    private String renderNamespace(C4Namespace namespace) {
-        Mustache mustache = MF.compile("templates/namespace.mustache");
-
-        List<Map<String, Object>> labelGroups = new ArrayList<>();
-        for (C4LabelGroup lg : namespace.getLabelGroups()) {
-            Map<String, Object> lgModel = new HashMap<>();
-            lgModel.put("name", lg.getName().replace(".","-"));
-            lgModel.put("components", lg.getComponents().stream()
-                .map(c -> {
-                    Map<String, Object> model = new HashMap<>();
-                    model.put("kind", c.getKind().toLowerCase());
-                    model.put("id", c.getId().replace(".", "-"));
-                    model.put("name", c.getName());
-                    model.put("technology", c.getKind());
-                    model.put("description", c.getDescription());
-                    model.put("labels", Optional.ofNullable(c.getLabels()).orElse(Map.of()).entrySet().stream()
-                            .map(e -> Map.of("key", e.getKey(), "value", e.getValue()))
-                            .toList());
-                    model.put("annotations", Optional.ofNullable(c.getAnnotations()).orElse(Map.of()).entrySet().stream()
-                            .map(e -> Map.of("key", e.getKey(), "value", e.getValue()))
-                            .toList());
-                    return model;
-                })
-                .toList());
-            labelGroups.add(lgModel);
+    private String renderSpec(final C4Model model) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("specification {\n");
+        sb.append(Constants.INDENT.repeat(1)).append("element ").append(Constants.MISSING_TYPE).append(" {\n");
+        sb.append(Constants.INDENT.repeat(2)).append("style {\n");
+        sb.append(Constants.INDENT.repeat(3)).append("color red\n");
+        sb.append(Constants.INDENT.repeat(3)).append("icon https://icons.getbootstrap.com/assets/icons/question-square.svg\n");
+        sb.append(Constants.INDENT.repeat(2)).append("}\n");
+        sb.append(Constants.INDENT.repeat(1)).append("}\n");
+        sb.append(Constants.INDENT.repeat(1)).append("element namespace {\n");
+        sb.append(Constants.INDENT.repeat(2)).append("style {\n");
+        sb.append(Constants.INDENT.repeat(3)).append("opacity 25%\n");
+        sb.append(Constants.INDENT.repeat(2)).append("}\n");
+        sb.append(Constants.INDENT.repeat(1)).append("}\n");
+        for (final String elementName: model.getSpecifications()) {
+            if (!"namespace".equals(elementName)) {
+                sb.append(Constants.INDENT.repeat(1)).append("element ").append(elementName).append("\n");
+            }
         }
-
-        List<Map<String, Object>> comps =
-                namespace.getComponents().stream()
-                        .map(c -> {
-                            Map<String, Object> model = new HashMap<>();
-
-                            model.put("kind", c.getKind().toLowerCase());
-                            model.put("id", c.getId().replace(".", "-"));
-                            model.put("name", c.getName());
-                            model.put("technology", c.getKind());
-                            model.put("description", c.getDescription());
-
-                            model.put(
-                                    "labels",
-                                    Optional.ofNullable(c.getLabels()).orElse(Map.of()).entrySet().stream()
-                                            .map(e -> Map.of(
-                                                    "key", e.getKey(),
-                                                    "value", e.getValue()
-                                            ))
-                                            .toList()
-                            );
-
-                            model.put(
-                                    "annotations",
-                                    Optional.ofNullable(c.getAnnotations()).orElse(Map.of()).entrySet().stream()
-                                            .map(e -> Map.of(
-                                                    "key", e.getKey(),
-                                                    "value", e.getValue()
-                                            ))
-                                            .toList()
-                            );
-
-                            return model;
-                        })
-                        .toList();
-
-
-        List<String> relations = new ArrayList<>();
-
-        for (C4Relationship rel : namespace.getRelationships()) {
-            relations.add(rel.getSource() + " -> " + rel.getTarget()+" "+rel.getTag());
-        }
-
-        Map<String, Object> ctx = Map.of(
-                "name", namespace.getName(),
-                "labelGroups", labelGroups,
-                "components", comps,
-                "relations", relations
-        );
-
-        StringWriter writer = new StringWriter();
-        mustache.execute(writer, ctx);
-        return writer.toString();
-    }
-
-    public String renderRelations(C4Model model) {
-        StringBuilder sb = new StringBuilder();
-        for (C4Relationship rel: model.getRelationships()){
-            sb.append(rel.getSource()).append(" -> ").append(rel.getTarget()).append("\n");
-        }
-
+        sb.append(Constants.INDENT.repeat(1)).append("tag ").append(Constants.SERVICE2SERVICE_TAG).append("\n");
+        sb.append("}\n");
         return sb.toString();
     }
 
-    public String renderSpec(C4Model model) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("specification ").append("{").append("\n");
-        for (String elementName: model.getSpecifications()){
-            sb.append("element ").append(" ").append(elementName).append("\n");
+    private String renderViews(final C4Model model) {
+        final Set<C4Component> nodes = model.getClusterScopedComponentsByKind("Node");
+        final StringBuilder sb = new StringBuilder();
+        sb.append("views {\n");
+        sb.append(Constants.INDENT.repeat(1)).append("view namespaces {\n");
+        sb.append(Constants.INDENT.repeat(2)).append("title 'Overviews / Namespaces'\n");
+        sb.append(Constants.INDENT.repeat(2)).append("include *\n");
+        sb.append(Constants.INDENT.repeat(3)).append("where kind is namespace\n");
+        sb.append(Constants.INDENT.repeat(1)).append("}\n");
+        if (!nodes.isEmpty()) {
+            sb.append(Constants.INDENT.repeat(1)).append("view nodes {\n");
+            sb.append(Constants.INDENT.repeat(2)).append("title 'Overviews / Nodes'\n");
+            sb.append(Constants.INDENT.repeat(2)).append("include ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
+            sb.append(Constants.INDENT.repeat(2)).append("include ").append(model.getNamespaces().values().stream().map(namespace -> namespace.getName() + "._").collect(Collectors.joining(", "))).append("\n");
+            sb.append(Constants.INDENT.repeat(1)).append("}\n");
         }
-        sb.append("}");
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            sb.append(Constants.INDENT.repeat(1)).append("view of ").append(namespace.getName()).append(" {\n");
+            sb.append(Constants.INDENT.repeat(2)).append("title 'Namespaces / ").append(namespace.getName()).append("'\n");
+            sb.append(Constants.INDENT.repeat(2)).append("include *\n");
+            if (!nodes.isEmpty()) {
+                sb.append(Constants.INDENT.repeat(2)).append("exclude ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
+            }
+            sb.append(Constants.INDENT.repeat(1)).append("}\n");
+        }
+        sb.append("}\n");
         return sb.toString();
+    }
+
+    public static final class Output {
+        private final String model;
+        private final String spec;
+        private final String view;
+
+        private Output(final String model, final String spec, final String view) {
+            this.model = model;
+            this.spec = spec;
+            this.view = view;
+        }
+
+        public String getModel() { return this.model; }
+
+        public String getSpec() { return this.spec; }
+
+        public String getView() { return this.view; }
     }
 
 }

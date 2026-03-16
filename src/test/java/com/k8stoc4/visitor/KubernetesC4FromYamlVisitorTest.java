@@ -1,34 +1,38 @@
 package com.k8stoc4.visitor;
 
-import com.k8stoc4.model.*;
+import com.k8stoc4.model.C4Component;
+import com.k8stoc4.model.C4Model;
+import com.k8stoc4.model.C4Namespace;
+import com.k8stoc4.model.Constants;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class KubernetesC4FromYamlVisitorTest {
+    private final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
     @Test
     void testComplexYamlParsing() throws Exception {
-        try (KubernetesClient client = new KubernetesClientBuilder().build();
-             FileInputStream fis = new FileInputStream("src/main/resources/complex.yaml")) {
+        try (final KubernetesClient client = new KubernetesClientBuilder().build();
+             final InputStream fis = classloader.getResourceAsStream("render/input/complex.yaml")) {
 
-            List<HasMetadata> resources = client.load(fis).items();
-            C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor();
+            final List<HasMetadata> resources = client.load(fis).items();
+            final C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor.Builder().build();
 
-            for (HasMetadata r : resources) {
+            for (final HasMetadata r : resources) {
                 VisitorUtils.accept(r, visitor);
             }
 
             visitor.addAllRelationships();
 
-            C4Model model = visitor.getModel();
+            final C4Model model = visitor.getModel();
 
             verifyNamespace(model);
             verifyComponents(model);
@@ -43,19 +47,19 @@ class KubernetesC4FromYamlVisitorTest {
         }
     }
 
-    private void verifyNamespace(C4Model model) {
-        Map<String, C4Namespace> namespaces = model.getNamespaces();
+    private void verifyNamespace(final C4Model model) {
+        final Map<String, C4Namespace> namespaces = model.getNamespaces();
         assertTrue(namespaces.containsKey("demo-app"), "Should contain demo-app namespace");
 
-        C4Namespace namespace = namespaces.get("demo-app");
+        final C4Namespace namespace = namespaces.get("demo-app");
         assertEquals("demo-app", namespace.getName());
     }
 
-    private void verifyClusterScoped(C4Model model) {
-        assertTrue(model.getClusterScopedComponents().size() > 0, "Should have cluster-scoped components");
+    private void verifyClusterScoped(final C4Model model) {
+        assertFalse(model.getClusterScopedComponents().isEmpty(), "Should have cluster-scoped components");
 
-        C4Component pv = model.getClusterScopedComponents().stream()
-                .filter(c -> c.getKind().equals("PersistentVolume"))
+        final C4Component pv = model.getClusterScopedComponents().stream()
+                .filter(c -> "PersistentVolume".equals(c.getKind()))
                 .findFirst()
                 .orElse(null);
 
@@ -64,115 +68,114 @@ class KubernetesC4FromYamlVisitorTest {
         assertEquals(Constants.CLUSTER_LEVEL, pv.getNamespace());
     }
 
-    private void verifyComponents(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyComponents(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "demo-app namespace should exist");
 
-        Map<String, C4Component> components = namespace.getComponents().stream()
+        final Map<String, C4Component> components = namespace.getComponents().stream()
                 .collect(java.util.stream.Collectors.toMap(C4Component::getId, c -> c));
 
         assertEquals(22, components.size(), "Should have 22 components (PersistentVolume is now cluster-scoped, Namespace is also cluster-scoped)");
 
-        C4Component postgresDeployment = components.get("statefulset_postgres");
+        final C4Component postgresDeployment = components.get("statefulset_postgres");
         assertNotNull(postgresDeployment, "Postgres statefulset should exist");
         assertEquals("postgres", postgresDeployment.getName());
         assertEquals("StatefulSet", postgresDeployment.getKind());
         assertEquals("demo-app", postgresDeployment.getNamespace());
-        assertEquals("postgres:14", postgresDeployment.getImage());
-        assertEquals(Map.of("app", "postgres"), postgresDeployment.getLabels());
+        assertEquals(Map.of("postgres", "postgres:14"), postgresDeployment.getContainerImages());
+        assertEquals(Map.of("app", "postgres"), postgresDeployment.getResource().getMetadata().getLabels());
 
-        C4Component postgresService = components.get("service_postgres");
+        final C4Component postgresService = components.get("service_postgres");
         assertNotNull(postgresService, "Postgres service should exist");
         assertEquals("postgres", postgresService.getName());
         assertEquals("Service", postgresService.getKind());
 
-        C4Component redisDeployment = components.get("deployment_redis");
+        final C4Component redisDeployment = components.get("deployment_redis");
         assertNotNull(redisDeployment, "Redis deployment should exist");
         assertEquals("redis", redisDeployment.getName());
         assertEquals("Deployment", redisDeployment.getKind());
-        assertEquals("redis:7", redisDeployment.getImage());
-        assertEquals(Map.of("app", "redis"), redisDeployment.getLabels());
+        assertEquals(Map.of("redis", "redis:7"), redisDeployment.getContainerImages());
+        assertEquals(Map.of("app", "redis"), redisDeployment.getResource().getMetadata().getLabels());
 
-        C4Component redisService = components.get("service_redis");
+        final C4Component redisService = components.get("service_redis");
         assertNotNull(redisService, "Redis service should exist");
         assertEquals("redis", redisService.getName());
         assertEquals("Service", redisService.getKind());
 
-        C4Component messageBrokerDeployment = components.get("deployment_message-broker");
+        final C4Component messageBrokerDeployment = components.get("deployment_message-broker");
         assertNotNull(messageBrokerDeployment, "Message broker deployment should exist");
         assertEquals("message-broker", messageBrokerDeployment.getName());
-        assertEquals("rabbitmq:3-management", messageBrokerDeployment.getImage());
-        assertEquals(Map.of("app", "rabbitmq"), messageBrokerDeployment.getLabels());
+        assertEquals(Map.of("rabbitmq","rabbitmq:3-management"), messageBrokerDeployment.getContainerImages());
+        assertEquals(Map.of("app", "rabbitmq"), messageBrokerDeployment.getResource().getMetadata().getLabels());
 
-        C4Component backendDeployment = components.get("deployment_backend");
+        final C4Component backendDeployment = components.get("deployment_backend");
         assertNotNull(backendDeployment, "Backend deployment should exist");
         assertEquals("backend", backendDeployment.getName());
-        assertEquals("yourorg/backend:1.0", backendDeployment.getImage());
-        assertEquals(Map.of("app", "backend"), backendDeployment.getLabels());
+        assertEquals(Map.of("backend", "yourorg/backend:1.0"), backendDeployment.getContainerImages());
+        assertEquals(Map.of("app", "backend"), backendDeployment.getResource().getMetadata().getLabels());
 
-        C4Component authDeployment = components.get("deployment_auth");
+        final C4Component authDeployment = components.get("deployment_auth");
         assertNotNull(authDeployment, "Auth deployment should exist");
         assertEquals("auth", authDeployment.getName());
-        assertEquals("yourorg/auth:1.0", authDeployment.getImage());
+        assertEquals(Map.of("auth", "yourorg/auth:1.0"), authDeployment.getContainerImages());
 
-        C4Component frontendDeployment = components.get("deployment_frontend");
+        final C4Component frontendDeployment = components.get("deployment_frontend");
         assertNotNull(frontendDeployment, "Frontend deployment should exist");
         assertEquals("frontend", frontendDeployment.getName());
-        assertEquals("nginx:stable", frontendDeployment.getImage());
+        assertEquals(Map.of("frontend", "nginx:stable"), frontendDeployment.getContainerImages());
 
-        C4Component configMap = components.get("configmap_frontend-config");
+        final C4Component configMap = components.get("configmap_frontend-config");
         assertNotNull(configMap, "Frontend configmap should exist");
         assertEquals("frontend-config", configMap.getName());
         assertEquals("ConfigMap", configMap.getKind());
 
-        C4Component secret = components.get("secret_db-credentials");
+        final C4Component secret = components.get("secret_db-credentials");
         assertNotNull(secret, "DB credentials secret should exist");
         assertEquals("db-credentials", secret.getName());
         assertEquals("Secret", secret.getKind());
 
-        C4Component ingress = components.get("ingress_demo-ingress");
+        final C4Component ingress = components.get("ingress_demo-ingress");
         assertNotNull(ingress, "Demo ingress should exist");
         assertEquals("demo-ingress", ingress.getName());
         assertEquals("Ingress", ingress.getKind());
 
-        C4Component pvc = components.get("persistentvolumeclaim_postgres-pvc");
+        final C4Component pvc = components.get("persistentvolumeclaim_postgres-pvc");
         assertNotNull(pvc, "Postgres PVC should exist");
         assertEquals("postgres-pvc", pvc.getName());
         assertEquals("PersistentVolumeClaim", pvc.getKind());
 
-        C4Component hpa = components.get("horizontalpodautoscaler_backend-hpa");
+        final C4Component hpa = components.get("horizontalpodautoscaler_backend-hpa");
         assertNotNull(hpa, "Backend HPA should exist");
         assertEquals("backend-hpa", hpa.getName());
         assertEquals("HorizontalPodAutoscaler", hpa.getKind());
 
-        C4Component pdb = components.get("poddisruptionbudget_backend-pdb");
+        final C4Component pdb = components.get("poddisruptionbudget_backend-pdb");
         assertNotNull(pdb, "Backend PDB should exist");
         assertEquals("backend-pdb", pdb.getName());
         assertEquals("PodDisruptionBudget", pdb.getKind());
 
-        C4Component serviceAccount = components.get("serviceaccount_demo-app-sa");
+        final C4Component serviceAccount = components.get("serviceaccount_demo-app-sa");
         assertNotNull(serviceAccount, "Service account should exist");
         assertEquals("demo-app-sa", serviceAccount.getName());
         assertEquals("ServiceAccount", serviceAccount.getKind());
 
-        C4Component role = components.get("role_demo-app-role");
+        final C4Component role = components.get("role_demo-app-role");
         assertNotNull(role, "Role should exist");
         assertEquals("demo-app-role", role.getName());
         assertEquals("Role", role.getKind());
 
-        C4Component roleBinding = components.get("rolebinding_demo-app-rb");
+        final C4Component roleBinding = components.get("rolebinding_demo-app-rb");
         assertNotNull(roleBinding, "Role binding should exist");
         assertEquals("demo-app-rb", roleBinding.getName());
         assertEquals("RoleBinding", roleBinding.getKind());
 
-
-        C4Component daemonSet = components.get("daemonset_node-logger");
+        final C4Component daemonSet = components.get("daemonset_node-logger");
         assertNotNull(daemonSet, "DaemonSet should exist");
         assertEquals("node-logger", daemonSet.getName());
         assertEquals("DaemonSet", daemonSet.getKind());
     }
 
-    private void verifySpecifications(C4Model model) {
+    private void verifySpecifications(final C4Model model) {
         assertTrue(model.getSpecifications().contains("namespace"), "Should contain namespace");
         assertTrue(model.getSpecifications().contains("statefulset"), "Should contain statefulset");
         assertTrue(model.getSpecifications().contains("deployment"), "Should contain deployment");
@@ -190,130 +193,130 @@ class KubernetesC4FromYamlVisitorTest {
         assertTrue(model.getSpecifications().contains("poddisruptionbudget"), "Should contain poddisruptionbudget");
     }
 
-    private void verifyDeploymentToServiceRelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyDeploymentToServiceRelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_postgres") 
+                .anyMatch(r -> "demo-app.service_postgres".equals(r.getSource())
                     && r.getTarget().equals("demo-app.statefulset_postgres")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service postgres should route to statefulset postgres");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_redis") 
+                .anyMatch(r -> "demo-app.service_redis".equals(r.getSource())
                     && r.getTarget().equals("demo-app.deployment_redis")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service redis should route to deployment redis");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_backend") 
+                .anyMatch(r -> "demo-app.service_backend".equals(r.getSource())
                     && r.getTarget().equals("demo-app.deployment_backend")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service backend should route to deployment backend");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_auth") 
+                .anyMatch(r -> "demo-app.service_auth".equals(r.getSource())
                     && r.getTarget().equals("demo-app.deployment_auth")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service auth should route to deployment auth");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_frontend") 
+                .anyMatch(r -> "demo-app.service_frontend".equals(r.getSource())
                     && r.getTarget().equals("demo-app.deployment_frontend")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service frontend should route to deployment frontend");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.service_message-broker") 
+                .anyMatch(r -> "demo-app.service_message-broker".equals(r.getSource())
                     && r.getTarget().equals("demo-app.deployment_message-broker")
                     && r.getDescription().equals(Constants.ROUTES_TO_RELATIONSHIP)),
                 "Service message-broker should route to deployment message-broker");
     }
 
-    private void verifyIngressToServiceRelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyIngressToServiceRelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.ingress_demo-ingress") 
+                .anyMatch(r -> "demo-app.ingress_demo-ingress".equals(r.getSource())
                     && r.getTarget().equals("demo-app.service_frontend")
                     && r.getDescription().equals(Constants.ROUTES_HTTP_RELATIONSHIP)),
                 "Ingress should route HTTP traffic to frontend service");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.ingress_demo-ingress") 
+                .anyMatch(r -> r.getSource().equals("demo-app.ingress_demo-ingress")
                     && r.getTarget().equals("demo-app.service_backend")
                     && r.getDescription().equals(Constants.ROUTES_HTTP_RELATIONSHIP)),
                 "Ingress should route HTTP traffic to backend service");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.ingress_demo-ingress") 
+                .anyMatch(r -> r.getSource().equals("demo-app.ingress_demo-ingress")
                     && r.getTarget().equals("demo-app.service_auth")
                     && r.getDescription().equals(Constants.ROUTES_HTTP_RELATIONSHIP)),
                 "Ingress should route HTTP traffic to auth service");
     }
 
-    private void verifyPodConfigRelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyPodConfigRelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.deployment_frontend") 
+                .anyMatch(r -> r.getSource().equals("demo-app.deployment_frontend")
                     && r.getTarget().equals("demo-app.configmap_frontend-config")
                     && r.getTechnology().equals(Constants.CONFIGMAP_TECHNOLOGY)),
                 "Frontend deployment should mount frontend-config configmap");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.deployment_backend") 
+                .anyMatch(r -> r.getSource().equals("demo-app.deployment_backend")
                     && r.getTarget().equals("demo-app.secret_db-credentials")
                     && r.getTechnology().equals(Constants.SECRET_TECHNOLOGY)),
                 "Backend deployment should mount db-credentials secret (envFrom)");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.statefulset_postgres") 
+                .anyMatch(r -> r.getSource().equals("demo-app.statefulset_postgres")
                     && r.getTarget().equals("demo-app.secret_db-credentials")
                     && r.getTechnology().equals(Constants.SECRET_TECHNOLOGY)),
                 "Postgres statefulset should mount db-credentials secret (env)");
     }
 
-    private void verifyHPARelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyHPARelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.horizontalpodautoscaler_backend-hpa") 
+                .anyMatch(r -> r.getSource().equals("demo-app.horizontalpodautoscaler_backend-hpa")
                     && r.getTarget().equals("demo-app.deployment_backend")
                     && r.getDescription().equals(Constants.SCALES_RELATIONSHIP)
                     && r.getTechnology().equals(Constants.TECHNOLOGY_HPA)),
                 "HPA should scale backend deployment");
     }
 
-    private void verifyPDBRelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyPDBRelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.poddisruptionbudget_backend-pdb") 
+                .anyMatch(r -> r.getSource().equals("demo-app.poddisruptionbudget_backend-pdb")
                     && r.getTarget().equals("demo-app.deployment_backend")
                     && r.getDescription().equals(Constants.PROTECTS_RELATIONSHIP)
                     && r.getTechnology().equals(Constants.TECHNOLOGY_PDB)),
                 "PDB should protect backend deployment");
     }
 
-    private void verifyServiceAccountRelationships(C4Model model) {
-        C4Namespace namespace = model.getNamespaces().get("demo-app");
+    private void verifyServiceAccountRelationships(final C4Model model) {
+        final C4Namespace namespace = model.getNamespaces().get("demo-app");
         assertNotNull(namespace, "Namespace should exist");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.statefulset_postgres") 
+                .anyMatch(r -> r.getSource().equals("demo-app.statefulset_postgres")
                     && r.getTarget().equals("demo-app.serviceaccount_demo-app-sa")
                     && r.getDescription().equals(Constants.USES_RELATIONSHIP)
                     && r.getTechnology().equals(Constants.TECHNOLOGY_SERVICEACCOUNT)),
                 "Postgres statefulset should use demo-app-sa service account");
 
         assertTrue(namespace.getRelationships().stream()
-                .anyMatch(r -> r.getSource().equals("demo-app.deployment_backend") 
+                .anyMatch(r -> r.getSource().equals("demo-app.deployment_backend")
                     && r.getTarget().equals("demo-app.serviceaccount_demo-app-sa")
                     && r.getDescription().equals(Constants.USES_RELATIONSHIP)
                     && r.getTechnology().equals(Constants.TECHNOLOGY_SERVICEACCOUNT)),

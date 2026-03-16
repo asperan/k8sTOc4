@@ -2,7 +2,8 @@ package com.k8stoc4.model;
 
 import java.util.Set;
 
-public class Constants {
+public final class Constants {
+    public static final String INDENT = "    ";
     public static final String DEFAULT_NAMESPACE = "default";
     public static final String CLUSTER_LEVEL = "cluster";
     public static final String MOUNT_RELATIONSHIP = "mount";
@@ -24,7 +25,11 @@ public class Constants {
     public static final String BOUNDS_RELATIONSHIP = "bounds";
     public static final String TECHNOLOGY_PV = "pv";
     public static final String TECHNOLOGY_STORAGECLASS = "storageclass";
-    public static final String BUNDS_RELATIONSHIP = "binds";
+    public static final String BINDS_RELATIONSHIP = "binds";
+    public static final String OWNER_RELATIONSHIP = "controls";
+    public static final String K8S_TECHNOLOGY = "k8s";
+    public static final String SERVICE2SERVICE_TAG = "service2service";
+    public static final String MISSING_TYPE = "missing";
 
     public static final Set<String> CLUSTER_SCOPED_RESOURCES = Set.of(
         "PersistentVolume",
@@ -51,7 +56,9 @@ public class Constants {
         "CertificateSigningRequest"
     );
 
-    public static boolean isClusterScoped(String kind) {
+    public static boolean isClusterScoped(final String kind) {
         return CLUSTER_SCOPED_RESOURCES.contains(kind);
     }
+
+    private Constants() {}
 }

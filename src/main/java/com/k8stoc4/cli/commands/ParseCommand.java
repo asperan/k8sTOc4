@@ -1,21 +1,13 @@
 package com.k8stoc4.cli.commands;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import picocli.CommandLine;
+import com.k8stoc4.controller.K8sToC4Controller;
+import com.k8stoc4.controller.RenderOutputWriter;
+import com.k8stoc4.controller.provider.FileInputProvider;
+import com.k8stoc4.controller.writer.FileWriter;
+import com.k8stoc4.controller.writer.SystemOutWriter;
 import com.k8stoc4.render.C4DslRenderer;
-import com.k8stoc4.visitor.C4ModelBuilderVisitor;
-import com.k8stoc4.visitor.VisitorUtils;
+import picocli.CommandLine;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Optional;
 
 @CommandLine.Command(
@@ -52,39 +44,20 @@ public class ParseCommand implements Runnable {
     )
     private Optional<String> groupByLabel;
 
+    @CommandLine.Option(
+            names = {"--rewrite-missing"},
+            description = "Whether to create entities for missing referenced objects.",
+            defaultValue = "false",
+            required = false
+    )
+    private boolean rewriteMissing;
+
+    public ParseCommand() {}
+
     @Override
     public void run() {
-        try (KubernetesClient client = new KubernetesClientBuilder().build();
-             FileInputStream fis = new FileInputStream(input)) {
-
-            List<HasMetadata> resources = client.load(fis).items();
-            C4ModelBuilderVisitor visitor = new C4ModelBuilderVisitor(defaultNs);
-            for (HasMetadata r : resources) {
-                VisitorUtils.accept(r, visitor);
-            }
-            visitor.addAllRelationships();
-            groupByLabel.ifPresent(visitor::groupComponentsByLabel);
-            C4DslRenderer renderer=new C4DslRenderer();
-
-            if (output.isPresent()) {
-                try {
-                    Files.writeString(Paths.get(output.get(), "spec.c4"),
-                            renderer.renderSpec(visitor.getModel()), StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                    Files.writeString(Paths.get(output.get(), "model.c4"),
-                            renderer.renderModel(visitor.getModel()), StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to write output files", e);
-                }
-            } else {
-                System.out.println(renderer.renderSpec(visitor.getModel()));
-                System.out.println(renderer.renderModel(visitor.getModel()));
-            }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Input file not found: " + input, e);
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading input file: " + input, e);
-        }
+        final C4DslRenderer.Output renderOutput = new K8sToC4Controller(new FileInputProvider(input), defaultNs, groupByLabel, rewriteMissing).execute();
+        final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
+        writer.write(renderOutput);
     }
 }

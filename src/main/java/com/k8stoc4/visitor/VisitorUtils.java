@@ -9,37 +9,52 @@ import com.k8stoc4.model.C4Component;
 
 import java.util.Map;
 
-public class VisitorUtils {
+public final class VisitorUtils {
+    private VisitorUtils() {}
 
-    public static void accept(HasMetadata resource,
-                              KubernetesResourceVisitor visitor) {
-        if (resource instanceof Pod p) visitor.visit(p);
-        else if (resource instanceof Deployment d) visitor.visit(d);
-        else if (resource instanceof ReplicaSet rs) visitor.visit(rs);
-        else if (resource instanceof StatefulSet s) visitor.visit(s);
-        else if (resource instanceof Service s) visitor.visit(s);
-        else if (resource instanceof Ingress i) visitor.visit(i);
-        else if (resource instanceof io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress i) visitor.visit(i);
-        else if (resource instanceof io.fabric8.kubernetes.api.model.extensions.Ingress i) visitor.visit(i);
-        else visitor.visit(resource); // fallback generico
+    public static void accept(final HasMetadata resource,
+                              final KubernetesResourceVisitor visitor) {
+        if (resource instanceof Pod p) {
+            visitor.visit(p);
+        } else if (resource instanceof Deployment d) {
+            visitor.visit(d);
+        } else if (resource instanceof ReplicaSet rs) {
+            visitor.visit(rs);
+        } else if (resource instanceof StatefulSet s) {
+            visitor.visit(s);
+        } else if (resource instanceof Service s) {
+            visitor.visit(s);
+        } else if (resource instanceof Ingress i) {
+            visitor.visit(i);
+        } else if (resource instanceof io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress i) {
+            visitor.visit(i);
+        } else if (resource instanceof io.fabric8.kubernetes.api.model.extensions.Ingress i) {
+            visitor.visit(i);
+        } else {
+            visitor.visit(resource); // fallback generico
+        }
     }
 
-    public static boolean containerMatchesSelector(C4Component component, Map<String, String> selector) {
-        if (selector == null || selector.isEmpty()) return false;
-
-        Map<String, String> podLabels=null;
-        if(component.getResource() instanceof Deployment){
-            podLabels = ((Deployment)component.getResource()).getSpec().getTemplate().getMetadata().getLabels();
-        }else if (component.getResource() instanceof StatefulSet){
-            podLabels = ((StatefulSet)component.getResource()).getSpec().getTemplate().getMetadata().getLabels();
+    public static boolean containerMatchesSelector(final C4Component component, final Map<String, String> selector) {
+        if (selector == null || selector.isEmpty()) {
+            return false;
         }
 
-        if (podLabels == null || podLabels.isEmpty()) return false;
+        Map<String, String> podLabels=null;
+        if(component.getResource() instanceof Deployment d){
+            podLabels = d.getSpec().getTemplate().getMetadata().getLabels();
+        }else if (component.getResource() instanceof StatefulSet s){
+            podLabels = s.getSpec().getTemplate().getMetadata().getLabels();
+        }
 
-        for (Map.Entry<String, String> entry : selector.entrySet()) {
-            String key = entry.getKey();
-            String selectorLabelValue = entry.getValue();
-            String podLabelValue = podLabels.get(key);
+        if (podLabels == null || podLabels.isEmpty()) {
+            return false;
+        }
+
+        for (final Map.Entry<String, String> entry : selector.entrySet()) {
+            final String key = entry.getKey();
+            final String selectorLabelValue = entry.getValue();
+            final String podLabelValue = podLabels.get(key);
 
             if (!selectorLabelValue.equals(podLabelValue)) {
                 return false;

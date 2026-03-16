@@ -1,0 +1,28 @@
+specification {
+    element missing {
+        style {
+            color red
+            icon https://icons.getbootstrap.com/assets/icons/question-square.svg
+        }
+    }
+    element namespace {
+        style {
+            opacity 25%
+        }
+    }
+    element serviceaccount
+    element role
+    element rolebinding
+    element configmap
+    element secret
+    element persistentvolume
+    element persistentvolumeclaim
+    element statefulset
+    element service
+    element deployment
+    element ingress
+    element horizontalpodautoscaler
+    element poddisruptionbudget
+    element daemonset
+    tag service2service
+}

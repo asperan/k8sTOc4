@@ -1,0 +1,61 @@
+model {
+    namespace default {
+        deployment deployment_sample-app 'sample-app' {
+            technology "Deployment"
+            description ""
+            metadata {
+                containerImages '
+                    sample-app: nginx:1.25
+                '
+                labels '
+                    app: sample-app
+                '
+                annotations '
+                '
+            }
+        }
+        service service_sample-app-service 'sample-app-service' {
+            technology "Service"
+            description ""
+            metadata {
+                labels '
+                '
+                annotations '
+                '
+            }
+        }
+        configmap configmap_sample-config 'sample-config' {
+            technology "ConfigMap"
+            description ""
+            metadata {
+                labels '
+                '
+                annotations '
+                '
+            }
+        }
+        ingress ingress_sample-app-ingress 'sample-app-ingress' {
+            technology "Ingress"
+            description ""
+            metadata {
+                labels '
+                '
+                annotations '
+                    nginx.ingress.kubernetes.io/rewrite-target: /
+                '
+            }
+        }
+        default.deployment_sample-app -> default.configmap_sample-config {
+            description 'mount'
+            technology 'configmap'
+        }
+        default.ingress_sample-app-ingress -> default.service_sample-app-service {
+            description 'routes HTTP traffic'
+            technology 'HTTP'
+        }
+        default.service_sample-app-service -> default.deployment_sample-app {
+            description 'routes to'
+            technology 'TCP/HTTP'
+        }
+    }
+}

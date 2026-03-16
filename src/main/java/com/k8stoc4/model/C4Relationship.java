@@ -2,35 +2,34 @@ package com.k8stoc4.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
 @EqualsAndHashCode
 public class C4Relationship {
-    public String source;      
-    public String target;      
-    public String description; 
-    public String technology;
-    public String tag="";
+    private final String source;
+    private final String target;
+    private final String description;
+    private final String technology;
+    private final String tag;
 
-    public C4Relationship(String source,
-                          String target,
-                          String description,
-                          String technology) {
+    public C4Relationship(final String source,
+                          final String target,
+                          final String description,
+                          final String technology) {
         this.source = source;
         this.target = target;
         this.description = description;
         this.technology = technology;
+        this.tag = "";
     }
 
-    public C4Relationship(String source,
-                          String target,
-                          String description,
-                          String technology,
-                          String tag) {
+    public C4Relationship(final String source,
+                          final String target,
+                          final String description,
+                          final String technology,
+                          final String tag) {
         this.source = source;
         this.target = target;
         this.description = description;
