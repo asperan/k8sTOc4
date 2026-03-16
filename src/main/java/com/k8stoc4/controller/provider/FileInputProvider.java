@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class FileInputProvider implements ResourceProvider {
     public List<HasMetadata> resources() {
         try (KubernetesClient client = new KubernetesClientBuilder().build();
              FileInputStream fis = new FileInputStream(this.input)) {
-            String s = new String(fis.readAllBytes());
+            String s = new String(fis.readAllBytes(), Charset.defaultCharset());
             return client.load(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8))).items();
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Input file not found: " + input, e);
