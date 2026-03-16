@@ -22,8 +22,8 @@ public class C4DslRenderer {
     }
 
     // Render principale: workspace
-    private String renderModel(C4Model model) {
-        StringBuilder sb = new StringBuilder();
+    private String renderModel(final C4Model model) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("model {\n");
         sb.append(renderClusterScoped(model));
         for (C4Namespace namespace : model.getNamespaces().values()) {
@@ -33,12 +33,12 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    private String renderClusterScoped(C4Model model) {
+    private String renderClusterScoped(final C4Model model) {
         if (model.getClusterScopedComponents() == null || model.getClusterScopedComponents().isEmpty()) {
             return "";
         }
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("    // Cluster-scoped resources\n");
         for (final C4Component component : model.getClusterScopedComponents()) {
             sb.append(C4ComponentPresenter.present(component).lines().map(it -> INDENT_STRING + it).collect(Collectors.joining("\n"))).append("\n");
@@ -52,8 +52,8 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    private String renderSpec(C4Model model) {
-        StringBuilder sb = new StringBuilder();
+    private String renderSpec(final C4Model model) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("specification {\n");
         sb.append("    element ").append(Constants.MISSING_TYPE).append(" {\n");
         sb.append("        style {\n");
@@ -76,9 +76,9 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    private String renderViews(C4Model model) {
+    private String renderViews(final C4Model model) {
         final Set<C4Component> nodes = model.getClusterScopedComponentsByKind("Node");
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("views {\n");
         sb.append("    view namespaces {\n");
         sb.append("        title 'Overviews / Namespaces'\n");
@@ -110,7 +110,7 @@ public class C4DslRenderer {
         private final String spec;
         private final String view;
 
-        private Output(String model, String spec, String view) {
+        private Output(final String model, final String spec, final String view) {
             this.model = model;
             this.spec = spec;
             this.view = view;

@@ -15,7 +15,7 @@ public final class K8sToC4Controller {
     private final ResourceProvider resourceProvider;
     private final boolean rewriteMissing;
 
-    public K8sToC4Controller(ResourceProvider resourceProvider, Optional<String> defaultNamespace, Optional<String> groupByLabel, boolean rewriteMissing) {
+    public K8sToC4Controller(final ResourceProvider resourceProvider, final Optional<String> defaultNamespace, final Optional<String> groupByLabel, final boolean rewriteMissing) {
         this.defaultNamespace = defaultNamespace;
         this.groupByLabel = groupByLabel;
         this.resourceProvider = resourceProvider;
@@ -23,7 +23,7 @@ public final class K8sToC4Controller {
     }
 
     public C4DslRenderer.Output execute() {
-        List<HasMetadata> resources = this.resourceProvider.resources();
+        final List<HasMetadata> resources = this.resourceProvider.resources();
         final C4ModelBuilderVisitor.Builder visitorBuilder = new C4ModelBuilderVisitor.Builder();
         if (this.defaultNamespace.isPresent()) {
             visitorBuilder.setDefaultNamespace(this.defaultNamespace);

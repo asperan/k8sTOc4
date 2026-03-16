@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class C4NamespacePresenter {
     public static String present(C4Namespace namespace) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("namespace ").append(namespace.getName()).append(" {\n");
         for (C4LabelGroup labelGroup : namespace.getLabelGroups()) {
             sb.append(C4LabelGroupPresenter.present(labelGroup).lines().map(it -> "    " + it).collect(Collectors.joining("\n"))).append("\n");

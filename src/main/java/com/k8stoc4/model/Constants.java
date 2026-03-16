@@ -55,7 +55,7 @@ public class Constants {
         "CertificateSigningRequest"
     );
 
-    public static boolean isClusterScoped(String kind) {
+    public static boolean isClusterScoped(final String kind) {
         return CLUSTER_SCOPED_RESOURCES.contains(kind);
     }
 }

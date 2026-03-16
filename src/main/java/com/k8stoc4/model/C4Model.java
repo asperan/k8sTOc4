@@ -20,17 +20,17 @@ public  class C4Model {
 
     public C4Model(){ }
 
-    public void addRelationship(C4Relationship r) { relationships.add(r); }
+    public void addRelationship(final C4Relationship r) { relationships.add(r); }
 
-    public void addClusterScopedComponent(C4Component c) { clusterScopedComponents.add(c); }
+    public void addClusterScopedComponent(final C4Component c) { clusterScopedComponents.add(c); }
 
-    public Set<C4Component> getComponentsByKind(String namespace,String kind){
+    public Set<C4Component> getComponentsByKind(final String namespace, final String kind){
         return namespaces.get(namespace).getComponents().stream().parallel()
                 .filter(c4Component ->kind.equalsIgnoreCase(c4Component.getKind()))
                 .collect(Collectors.toSet());
     }
 
-    public Set<C4Component> getClusterScopedComponentsByKind(String kind){
+    public Set<C4Component> getClusterScopedComponentsByKind(final String kind){
         return clusterScopedComponents.stream().parallel()
                 .filter(c4Component -> kind.equalsIgnoreCase(c4Component.getKind()))
                 .collect(Collectors.toSet());

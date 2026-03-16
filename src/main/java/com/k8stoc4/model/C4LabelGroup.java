@@ -16,12 +16,12 @@ public class C4LabelGroup {
     private final Set<C4Component> components = new LinkedHashSet<>();
     private final Set<C4Relationship> relationships = new LinkedHashSet<>();
 
-    public C4LabelGroup(String name, String labelKey, String labelValue) {
+    public C4LabelGroup(final String name, final String labelKey, final String labelValue) {
         this.name = name;
         this.labelKey = labelKey;
         this.labelValue = labelValue;
     }
 
-    public void addComponents(C4Component c) { components.add(c); }
-    public void addRelationship(C4Relationship r) { relationships.add(r); }
+    public void addComponents(final C4Component c) { components.add(c); }
+    public void addRelationship(final C4Relationship r) { relationships.add(r); }
 }

@@ -23,9 +23,9 @@ public class FileInputProvider implements ResourceProvider {
 
     @Override
     public List<HasMetadata> resources() {
-        try (KubernetesClient client = new KubernetesClientBuilder().build();
-             FileInputStream fis = new FileInputStream(this.input)) {
-            String s = new String(fis.readAllBytes(), Charset.defaultCharset());
+        try (final KubernetesClient client = new KubernetesClientBuilder().build();
+             final FileInputStream fis = new FileInputStream(this.input)) {
+            final String s = new String(fis.readAllBytes(), Charset.defaultCharset());
             return client.load(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8))).items();
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Input file not found: " + input, e);

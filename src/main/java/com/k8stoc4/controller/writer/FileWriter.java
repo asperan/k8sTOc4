@@ -20,7 +20,7 @@ public class FileWriter implements RenderOutputWriter {
     }
 
     @Override
-    public void write(C4DslRenderer.Output output) {
+    public void write(final C4DslRenderer.Output output) {
         try {
             //noinspection ResultOfMethodCallIgnored
             Paths.get(this.outputDir).toFile().mkdirs();
@@ -34,7 +34,7 @@ public class FileWriter implements RenderOutputWriter {
         }
     }
 
-    private void createOrOverwriteFile(Path path, String content) throws IOException {
+    private void createOrOverwriteFile(final Path path, final String content) throws IOException {
         Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 }

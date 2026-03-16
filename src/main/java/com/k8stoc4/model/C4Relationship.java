@@ -14,10 +14,10 @@ public class C4Relationship {
     private final String technology;
     private final String tag;
 
-    public C4Relationship(String source,
-                          String target,
-                          String description,
-                          String technology) {
+    public C4Relationship(final String source,
+                          final String target,
+                          final String description,
+                          final String technology) {
         this.source = source;
         this.target = target;
         this.description = description;
@@ -25,11 +25,11 @@ public class C4Relationship {
         this.tag = "";
     }
 
-    public C4Relationship(String source,
-                          String target,
-                          String description,
-                          String technology,
-                          String tag) {
+    public C4Relationship(final String source,
+                          final String target,
+                          final String description,
+                          final String technology,
+                          final String tag) {
         this.source = source;
         this.target = target;
         this.description = description;

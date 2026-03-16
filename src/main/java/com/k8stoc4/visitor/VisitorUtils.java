@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class VisitorUtils {
 
-    public static void accept(HasMetadata resource,
-                              KubernetesResourceVisitor visitor) {
+    public static void accept(final HasMetadata resource,
+                              final KubernetesResourceVisitor visitor) {
         if (resource instanceof Pod p) visitor.visit(p);
         else if (resource instanceof Deployment d) visitor.visit(d);
         else if (resource instanceof ReplicaSet rs) visitor.visit(rs);
@@ -24,7 +24,7 @@ public class VisitorUtils {
         else visitor.visit(resource); // fallback generico
     }
 
-    public static boolean containerMatchesSelector(C4Component component, Map<String, String> selector) {
+    public static boolean containerMatchesSelector(final C4Component component, final Map<String, String> selector) {
         if (selector == null || selector.isEmpty()) return false;
 
         Map<String, String> podLabels=null;
@@ -36,7 +36,7 @@ public class VisitorUtils {
 
         if (podLabels == null || podLabels.isEmpty()) return false;
 
-        for (Map.Entry<String, String> entry : selector.entrySet()) {
+        for (final Map.Entry<String, String> entry : selector.entrySet()) {
             String key = entry.getKey();
             String selectorLabelValue = entry.getValue();
             String podLabelValue = podLabels.get(key);

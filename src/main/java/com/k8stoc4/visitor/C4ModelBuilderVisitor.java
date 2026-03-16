@@ -60,12 +60,12 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         addRBACRelationships();
     }
 
-    public void groupComponentsByLabel(String labelKey) {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : new HashSet<>(namespace.getComponents())) {
+    public void groupComponentsByLabel(final String labelKey) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : new HashSet<>(namespace.getComponents())) {
                 final String labelValue = component.getResource().getMetadata().getLabels().get(labelKey);
                 if (labelValue != null && !labelValue.isEmpty()) {
-                    C4LabelGroup group = namespace.getOrCreateLabelGroup(labelKey, labelValue);
+                    final C4LabelGroup group = namespace.getOrCreateLabelGroup(labelKey, labelValue);
                     group.addComponents(component);
                     namespace.removeComponent(component);
                 }
@@ -107,16 +107,11 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(StatefulSet statefulSet) {
+    public void visit(final StatefulSet statefulSet) {
         model.getSpecifications().add(statefulSet.getKind().toLowerCase());
-        String ns = Optional.ofNullable(statefulSet.getMetadata().getNamespace()).orElse(defaultNS);
-        C4Namespace namespace = getOrCreateSystem(ns);
-
-        C4Component component = new C4Component(
-                statefulSet,
-                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? statefulSet.getMetadata().getNamespace():defaultNS,
-                statefulSet.getMetadata().getName(),
-                statefulSet.getKind());
+        final String ns = Optional.ofNullable(statefulSet.getMetadata().getNamespace()).orElse(defaultNS);
+        final C4Namespace namespace = getOrCreateSystem(ns);
+        final C4Component component = new C4Component(statefulSet, ns, statefulSet.getMetadata().getName(), statefulSet.getKind());
 
         processPodSpec(namespace, component, statefulSet.getSpec().getTemplate().getSpec(),
                 statefulSet.getSpec().getTemplate().getMetadata().getLabels());
@@ -125,16 +120,11 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(ReplicaSet replicaSet) {
+    public void visit(final ReplicaSet replicaSet) {
         model.getSpecifications().add(replicaSet.getKind().toLowerCase());
-        String ns = Optional.ofNullable(replicaSet.getMetadata().getNamespace()).orElse(defaultNS);
-        C4Namespace namespace = getOrCreateSystem(ns);
-
-        C4Component component = new C4Component(
-                replicaSet,
-                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? replicaSet.getMetadata().getNamespace():defaultNS,
-                replicaSet.getMetadata().getName(),
-                replicaSet.getKind());
+        final String ns = Optional.ofNullable(replicaSet.getMetadata().getNamespace()).orElse(defaultNS);
+        final C4Namespace namespace = getOrCreateSystem(ns);
+        final C4Component component = new C4Component(replicaSet, ns, replicaSet.getMetadata().getName(), replicaSet.getKind());
 
         processPodSpec(namespace, component, replicaSet.getSpec().getTemplate().getSpec(),
                 replicaSet.getSpec().getTemplate().getMetadata().getLabels());
@@ -144,16 +134,11 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(Pod pod) {
+    public void visit(final Pod pod) {
         model.getSpecifications().add(pod.getKind().toLowerCase());
-        String ns = Optional.ofNullable(pod.getMetadata().getNamespace()).orElse(defaultNS);
-        C4Namespace namespace = getOrCreateSystem(ns);
-
-        C4Component component = new C4Component(
-                pod,
-                pod.getMetadata().getNamespace(),
-                pod.getMetadata().getName(),
-                pod.getKind());
+        final String ns = Optional.ofNullable(pod.getMetadata().getNamespace()).orElse(defaultNS);
+        final C4Namespace namespace = getOrCreateSystem(ns);
+        final C4Component component = new C4Component(pod, ns, pod.getMetadata().getName(), pod.getKind());
 
         processPodSpec(namespace, component, pod.getSpec(),
                 pod.getMetadata().getLabels());
@@ -161,7 +146,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         namespace.addComponents(component);
         addOwnerRelationship(namespace, component);
         if (pod.getSpec().getNodeName() != null) {
-            C4Relationship rel = new C4Relationship(
+            final C4Relationship rel = new C4Relationship(
                     "node_" + PresenterUtils.sanitizeComponentId(pod.getSpec().getNodeName()),
                     component.getNamespace() + "." + component.getId(),
                     Constants.OWNER_RELATIONSHIP,
@@ -172,16 +157,11 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(Deployment deployment) {
+    public void visit(final Deployment deployment) {
         model.getSpecifications().add(deployment.getKind().toLowerCase());
-        String ns = Optional.ofNullable(deployment.getMetadata().getNamespace()).orElse(defaultNS);
-        C4Namespace namespace = getOrCreateSystem(ns);
-
-        C4Component component = new C4Component(
-                deployment,
-                defaultNS.equals(Constants.DEFAULT_NAMESPACE)? deployment.getMetadata().getNamespace():defaultNS,
-                deployment.getMetadata().getName(),
-                deployment.getKind());
+        final String ns = Optional.ofNullable(deployment.getMetadata().getNamespace()).orElse(defaultNS);
+        final C4Namespace namespace = getOrCreateSystem(ns);
+        final C4Component component = new C4Component(deployment, ns, deployment.getMetadata().getName(), deployment.getKind());
 
         processPodSpec(namespace, component, deployment.getSpec().getTemplate().getSpec(),
                 deployment.getSpec().getTemplate().getMetadata().getLabels());
@@ -190,18 +170,16 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(Service svc) {
+    public void visit(final Service svc) {
         model.getSpecifications().add(svc.getKind().toLowerCase());
-        String ns = Optional.ofNullable(svc.getMetadata().getNamespace()).orElse(defaultNS);
-        C4Namespace namespace = getOrCreateSystem(ns);
-
-        C4Component service = new C4Component(svc, defaultNS.equals(Constants.DEFAULT_NAMESPACE)? svc.getMetadata().getNamespace():defaultNS,
-                svc.getMetadata().getName(), svc.getKind());
+        final String ns = Optional.ofNullable(svc.getMetadata().getNamespace()).orElse(defaultNS);
+        final C4Namespace namespace = getOrCreateSystem(ns);
+        final C4Component service = new C4Component(svc, ns, svc.getMetadata().getName(), svc.getKind());
         namespace.addComponents(service);
     }
 
     @Override
-    public void visit(Ingress ing) {
+    public void visit(final Ingress ing) {
         visitIngress(ing, () ->
             ing.getSpec()
                 .getRules()
@@ -222,7 +200,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress ing) {
+    public void visit(final io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress ing) {
         visitIngress(ing, () ->
             ing.getSpec()
                 .getRules()
@@ -243,7 +221,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(io.fabric8.kubernetes.api.model.extensions.Ingress ing) {
+    public void visit(final io.fabric8.kubernetes.api.model.extensions.Ingress ing) {
         final C4Component ingress = visitIngress(ing, () ->
             ing.getSpec()
                 .getRules()
@@ -265,84 +243,83 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     @Override
-    public void visit(HasMetadata resource) {
+    public void visit(final HasMetadata resource) {
         model.getSpecifications().add(resource.getKind().toLowerCase());
-        C4Component component = new C4Component(resource, resource.getMetadata().getNamespace(), resource.getMetadata().getName(), resource.getKind());
+        final C4Component component = new C4Component(resource, resource.getMetadata().getNamespace(), resource.getMetadata().getName(), resource.getKind());
         
         if (isClusterScopedResource(resource)) {
             component.setNamespace(Constants.CLUSTER_LEVEL);
             model.addClusterScopedComponent(component);
         } else {
-            String ns = Optional.ofNullable(resource.getMetadata().getNamespace()).orElse(defaultNS);
-            C4Namespace system = getOrCreateSystem(ns);
+            final String ns = Optional.ofNullable(resource.getMetadata().getNamespace()).orElse(defaultNS);
+            final C4Namespace system = getOrCreateSystem(ns);
             system.addComponents(component);
         }
     }
 
-    private C4Namespace getOrCreateSystem(String ns) {
+    private C4Namespace getOrCreateSystem(final String ns) {
         return model.getNamespaces().computeIfAbsent(ns, C4Namespace::new);
     }
 
-    private boolean isClusterScopedResource(HasMetadata resource) {
+    private boolean isClusterScopedResource(final HasMetadata resource) {
         return Constants.isClusterScoped(resource.getKind());
     }
 
     private void addServiceToServiceRelationships() {
-
         model.getNamespaces().values().forEach(namespace -> {
-            Map<String, C4Component> servicesByFqdn =
-                    model.getComponentsByKind(namespace.getName(), "service").stream()
-                            .collect(Collectors.toMap(
-                                    s -> s.getName() + "." + s.getNamespace(),
-                                    Function.identity()
-                            ));
+            final Map<String, C4Component> servicesByFqdn =
+                model.getComponentsByKind(namespace.getName(), "service")
+                    .stream()
+                    .collect(Collectors.toMap(
+                            s -> s.getName() + "." + s.getNamespace(),
+                            Function.identity()
+                        )
+                    );
             model.getComponentsByKind(namespace.getName(), "deployment").forEach(component -> {
-
-                Deployment deployment = (Deployment) component.getResource();
+                final Deployment deployment = (Deployment) component.getResource();
                 deployment.getSpec()
-                        .getTemplate()
-                        .getSpec()
-                        .getContainers()
-                        .forEach(container -> {
-                            if (container.getEnv() == null) return;
-                            container.getEnv().stream()
-                                    .map(EnvVar::getValue)
-                                    .filter(this::isHttpUrl)
-                                    .forEach(value ->
-                                            servicesByFqdn.forEach((fqdn, service) -> {
-                                                if (value.contains(fqdn)) {
-                                                    namespace.addRelationship(
-                                                            new C4Relationship(
-                                                                component.getNamespace() + "." + component.getId(),
-                                                                service.getNamespace() + "." + service.getId(),
-                                                                Constants.ROUTES_TO_RELATIONSHIP,
-                                                                Constants.TECHNOLOGY_TCP_HTTP,
-                                                                Constants.SERVICE2SERVICE_TAG
-                                                            )
-                                                    );
-                                                }
-                                            })
-                                    );
-                        });
+                    .getTemplate()
+                    .getSpec()
+                    .getContainers()
+                    .forEach(container -> {
+                        if (container.getEnv() == null) return;
+                        container.getEnv().stream()
+                            .map(EnvVar::getValue)
+                            .filter(this::isHttpUrl)
+                            .forEach(value ->
+                                servicesByFqdn.forEach((fqdn, service) -> {
+                                    if (value.contains(fqdn)) {
+                                        namespace.addRelationship(
+                                                new C4Relationship(
+                                                    component.getNamespace() + "." + component.getId(),
+                                                    service.getNamespace() + "." + service.getId(),
+                                                    Constants.ROUTES_TO_RELATIONSHIP,
+                                                    Constants.TECHNOLOGY_TCP_HTTP,
+                                                    Constants.SERVICE2SERVICE_TAG
+                                                )
+                                        );
+                                    }
+                                })
+                            );
+                    });
             });
         });
     }
 
-    private boolean isHttpUrl(String value) {
+    private boolean isHttpUrl(final String value) {
         return value != null &&
                 (value.startsWith("http://") || value.startsWith("https://"));
     }
 
     private void addServiceRelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
                 if (component.getKind().equalsIgnoreCase("service")) {
-                    Map<String, String> selector = ((Service)component.getResource()).getSpec().getSelector();
-
+                    final Map<String, String> selector = ((Service)component.getResource()).getSpec().getSelector();
                     if (selector != null && !selector.isEmpty()) {
-                        for (C4Component targetComp : namespace.getComponents()) {
+                        for (final C4Component targetComp : namespace.getComponents()) {
                             if (containerMatchesSelector(targetComp, selector)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         component.getNamespace() + "." + component.getId(),
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         Constants.ROUTES_TO_RELATIONSHIP,
@@ -358,16 +335,16 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addHPARelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
                 if (component.getResource() instanceof HorizontalPodAutoscaler hpa) {
-                    String scaleTargetName = hpa.getSpec().getScaleTargetRef().getName();
-                    String scaleTargetKind = hpa.getSpec().getScaleTargetRef().getKind();
+                    final String scaleTargetName = hpa.getSpec().getScaleTargetRef().getName();
+                    final String scaleTargetKind = hpa.getSpec().getScaleTargetRef().getKind();
 
-                    for (C4Component targetComp : namespace.getComponents()) {
+                    for (final C4Component targetComp : namespace.getComponents()) {
                         if (targetComp.getName().equals(scaleTargetName) &&
                                 targetComp.getKind().equalsIgnoreCase(scaleTargetKind)) {
-                            C4Relationship rel = new C4Relationship(
+                            final C4Relationship rel = new C4Relationship(
                                     component.getNamespace() + "." + component.getId(),
                                     targetComp.getNamespace() + "." + targetComp.getId(),
                                     Constants.SCALES_RELATIONSHIP,
@@ -382,17 +359,17 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addPDBRelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
                 if (component.getResource() instanceof PodDisruptionBudget pdb) {
-                    Map<String, String> selector = pdb.getSpec().getSelector() != null
+                    final Map<String, String> selector = pdb.getSpec().getSelector() != null
                             ? pdb.getSpec().getSelector().getMatchLabels()
                             : null;
 
                     if (selector != null && !selector.isEmpty()) {
-                        for (C4Component targetComp : namespace.getComponents()) {
+                        for (final C4Component targetComp : namespace.getComponents()) {
                             if (containerMatchesSelector(targetComp, selector)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         component.getNamespace() + "." + component.getId(),
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         Constants.PROTECTS_RELATIONSHIP,
@@ -408,16 +385,15 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addServiceAccountRelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
                 if (component.getResource() instanceof ServiceAccount sa) {
-                    String saName = sa.getMetadata().getName();
-
-                    for (C4Component targetComp : namespace.getComponents()) {
-                        HasMetadata resource = targetComp.getResource();
+                    final String saName = sa.getMetadata().getName();
+                    for (final C4Component targetComp : namespace.getComponents()) {
+                        final HasMetadata resource = targetComp.getResource();
                         if (resource instanceof Deployment d && d.getSpec().getTemplate().getSpec().getServiceAccountName() != null) {
                             if (d.getSpec().getTemplate().getSpec().getServiceAccountName().equals(saName)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         component.getNamespace() + "." + component.getId(),
                                         Constants.USES_RELATIONSHIP,
@@ -428,7 +404,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                         }
                         if (resource instanceof StatefulSet s && s.getSpec().getTemplate().getSpec().getServiceAccountName() != null) {
                             if (s.getSpec().getTemplate().getSpec().getServiceAccountName().equals(saName)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         component.getNamespace() + "." + component.getId(),
                                         Constants.USES_RELATIONSHIP,
@@ -439,7 +415,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                         }
                         if (resource instanceof Pod p && p.getSpec().getServiceAccountName() != null) {
                             if (p.getSpec().getServiceAccountName().equals(saName)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         component.getNamespace() + "." + component.getId(),
                                         Constants.USES_RELATIONSHIP,
@@ -455,17 +431,17 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addNetworkPolicyRelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
                 if (component.getResource() instanceof NetworkPolicy np) {
-                    String source = component.getNamespace() + "." + component.getId();
+                    final String source = component.getNamespace() + "." + component.getId();
 
                     if (np.getSpec().getPodSelector() != null && np.getSpec().getPodSelector().getMatchLabels() != null) {
-                        Map<String, String> selector = np.getSpec().getPodSelector().getMatchLabels();
+                        final Map<String, String> selector = np.getSpec().getPodSelector().getMatchLabels();
 
-                        for (C4Component targetComp : namespace.getComponents()) {
+                        for (final C4Component targetComp : namespace.getComponents()) {
                             if (containerMatchesSelector(targetComp, selector)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         source,
                                         targetComp.getNamespace() + "." + targetComp.getId(),
                                         Constants.POLICY_RELATIONSHIP,
@@ -481,18 +457,18 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addPVPVCRelationships() {
-        for (C4Component component : model.getClusterScopedComponents()) {
+        for (final C4Component component : model.getClusterScopedComponents()) {
             if (component.getResource() instanceof PersistentVolume pv) {
                 if (pv.getSpec().getClaimRef() != null) {
-                    String claimName = pv.getSpec().getClaimRef().getName();
-                    String claimNamespace = pv.getSpec().getClaimRef().getNamespace();
+                    final String claimName = pv.getSpec().getClaimRef().getName();
+                    final String claimNamespace = pv.getSpec().getClaimRef().getNamespace();
 
-                    for (C4Namespace namespace : model.getNamespaces().values()) {
+                    for (final C4Namespace namespace : model.getNamespaces().values()) {
                         if (namespace.getName().equals(claimNamespace)) {
-                            for (C4Component targetComp : namespace.getComponents()) {
+                            for (final C4Component targetComp : namespace.getComponents()) {
                                 if (targetComp.getKind().equalsIgnoreCase("PersistentVolumeClaim") &&
                                         targetComp.getName().equals(claimName)) {
-                                    C4Relationship rel = new C4Relationship(
+                                    final C4Relationship rel = new C4Relationship(
                                             component.getId(),
                                             targetComp.getNamespace() + "." + targetComp.getId(),
                                             Constants.BOUNDS_RELATIONSHIP,
@@ -507,15 +483,15 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
             }
         }
 
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component pvcComponent : namespace.getComponents()) {
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component pvcComponent : namespace.getComponents()) {
                 if (pvcComponent.getResource() instanceof io.fabric8.kubernetes.api.model.PersistentVolumeClaim pvc) {
-                    String volumeName = pvc.getSpec().getVolumeName();
+                    final String volumeName = pvc.getSpec().getVolumeName();
                     if (volumeName != null) {
-                        for (C4Component pvComponent : model.getClusterScopedComponents()) {
+                        for (final C4Component pvComponent : model.getClusterScopedComponents()) {
                             if (pvComponent.getResource() instanceof PersistentVolume pv &&
                                     pv.getMetadata().getName().equals(volumeName)) {
-                                C4Relationship rel = new C4Relationship(
+                                final C4Relationship rel = new C4Relationship(
                                         pvComponent.getId(),
                                         pvcComponent.getNamespace() + "." + pvcComponent.getId(),
                                         Constants.BOUNDS_RELATIONSHIP,
@@ -535,16 +511,16 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
             log.info("Adding StorageClass relationships. Cluster scoped components: {}", model.getClusterScopedComponents().size());
         }
 
-        for (C4Component scComponent : model.getClusterScopedComponents()) {
+        for (final C4Component scComponent : model.getClusterScopedComponents()) {
             if (scComponent.getResource() instanceof StorageClass sc) {
-                String scName = sc.getMetadata().getName();
+                final String scName = sc.getMetadata().getName();
                 if (log.isInfoEnabled()) {
                     log.info("Found StorageClass: {}", scName);
                 }
 
-                for (C4Component pvComponent : model.getClusterScopedComponents()) {
+                for (final C4Component pvComponent : model.getClusterScopedComponents()) {
                     if (pvComponent.getResource() instanceof PersistentVolume pv) {
-                        String pvStorageClassName = pv.getSpec().getStorageClassName();
+                        final String pvStorageClassName = pv.getSpec().getStorageClassName();
                         if (log.isInfoEnabled()) {
                             log.info("PV {} has storageClassName: {}", pvComponent.getId(), pvStorageClassName);
                         }
@@ -553,7 +529,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                             if (log.isInfoEnabled()) {
                                 log.info("Creating relationship: {} -> {} (binds)", scComponent.getId(), pvComponent.getId());
                             }
-                            C4Relationship rel = new C4Relationship(
+                            final C4Relationship rel = new C4Relationship(
                                     scComponent.getId(),
                                     pvComponent.getId(),
                                     Constants.BINDS_RELATIONSHIP,
@@ -571,18 +547,18 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
     }
 
     private void addRBACRelationships() {
-        for (C4Namespace namespace : model.getNamespaces().values()) {
-            for (C4Component component : namespace.getComponents()) {
-                String source = component.getNamespace() + "." + component.getId();
+        for (final C4Namespace namespace : model.getNamespaces().values()) {
+            for (final C4Component component : namespace.getComponents()) {
+                final String source = component.getNamespace() + "." + component.getId();
 
                 if (component.getResource() instanceof io.fabric8.kubernetes.api.model.rbac.RoleBinding rb) {
-                    String roleKind = rb.getRoleRef().getKind();
-                    String roleName = rb.getRoleRef().getName();
+                    final String roleKind = rb.getRoleRef().getKind();
+                    final String roleName = rb.getRoleRef().getName();
 
-                    for (C4Component targetComp : namespace.getComponents()) {
+                    for (final C4Component targetComp : namespace.getComponents()) {
                         if (targetComp.getKind().equalsIgnoreCase(roleKind) &&
                                 targetComp.getName().equals(roleName)) {
-                            C4Relationship rel = new C4Relationship(
+                            final C4Relationship rel = new C4Relationship(
                                     source,
                                     targetComp.getNamespace() + "." + targetComp.getId(),
                                     Constants.USES_RELATIONSHIP,
@@ -594,10 +570,10 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
                     for (io.fabric8.kubernetes.api.model.rbac.Subject subject : rb.getSubjects()) {
                         if (subject.getKind().equalsIgnoreCase("ServiceAccount")) {
-                            for (C4Component targetComp : namespace.getComponents()) {
+                            for (final C4Component targetComp : namespace.getComponents()) {
                                 if (targetComp.getKind().equalsIgnoreCase("ServiceAccount") &&
                                         targetComp.getName().equals(subject.getName())) {
-                                    C4Relationship rel = new C4Relationship(
+                                    final C4Relationship rel = new C4Relationship(
                                             targetComp.getNamespace() + "." + targetComp.getId(),
                                             source,
                                             Constants.USES_RELATIONSHIP,
@@ -613,18 +589,18 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
     }
 
-    private void processPodSpec(C4Namespace namespace, C4Component component, PodSpec podSpec, Map<String, String> labels) {
+    private void processPodSpec(final C4Namespace namespace, final C4Component component, final PodSpec podSpec, final Map<String, String> labels) {
         component.getResource().getMetadata().getLabels().putAll(labels);
         if (podSpec != null && podSpec.getContainers() != null) {
             podSpec.getContainers().forEach(c -> {
                 component.getContainerImages().put(c.getName(), c.getImage());
                 if (c.getEnvFrom() != null) {
-                    for (EnvFromSource envFrom : c.getEnvFrom()) {
+                    for (final EnvFromSource envFrom : c.getEnvFrom()) {
                         addValueFromRelationship(namespace, component, envFrom);
                     }
                 }
                 if (c.getEnv() != null) {
-                    for (EnvVar e : c.getEnv()) {
+                    for (final EnvVar e : c.getEnv()) {
                         if (e.getValueFrom() != null) {
                             addValueFromKeyRelationship(namespace, component, e.getValueFrom());
                         } else {
@@ -636,23 +612,23 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
 
         if (podSpec != null && podSpec.getVolumes() != null) {
-            for (Volume volume : podSpec.getVolumes()) {
+            for (final Volume volume : podSpec.getVolumes()) {
                 addVolumeRelationship(namespace, component, volume);
             }
         }
     }
 
-    private void addVolumeRelationship(C4Namespace namespace,
-                                       C4Component component,
-                                       Volume volume) {
-        String source = component.getNamespace() + "." + component.getId();
+    private void addVolumeRelationship(final C4Namespace namespace,
+                                       final C4Component component,
+                                       final Volume volume) {
+        final String source = component.getNamespace() + "." + component.getId();
         String target = "";
 
         if (volume.getPersistentVolumeClaim() != null && volume.getPersistentVolumeClaim().getClaimName() != null) {
             target = component.getNamespace() + ".persistentvolumeclaim_" + volume.getPersistentVolumeClaim().getClaimName();
         }
         if (volume.getProjected() != null) {
-            for (VolumeProjection projection : volume.getProjected().getSources()) {
+            for (final VolumeProjection projection : volume.getProjected().getSources()) {
                 if (projection.getConfigMap() != null) {
                     target = component.getNamespace() + ".configmap_" + projection.getConfigMap().getName();
                 } else if (projection.getSecret() != null) {
@@ -675,8 +651,8 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
     }
 
-    private void addValueFromRelationship(C4Namespace namespace, C4Component component, EnvFromSource valueFrom) {
-        String source = component.getNamespace() + "." + component.getId();
+    private void addValueFromRelationship(final C4Namespace namespace, final C4Component component, final EnvFromSource valueFrom) {
+        final String source = component.getNamespace() + "." + component.getId();
         if (valueFrom.getConfigMapRef() != null) {
             String target = component.getNamespace() + ".configmap_" + valueFrom.getConfigMapRef().getName();
             namespace.addRelationship(new C4Relationship(source, target, Constants.MOUNT_RELATIONSHIP, Constants.CONFIGMAP_TECHNOLOGY));
@@ -687,8 +663,8 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
     }
 
-    private void addValueFromKeyRelationship(C4Namespace namespace, C4Component component, EnvVarSource valueFrom) {
-        String source = component.getNamespace() + "." + component.getId();
+    private void addValueFromKeyRelationship(final C4Namespace namespace, final C4Component component, final EnvVarSource valueFrom) {
+        final String source = component.getNamespace() + "." + component.getId();
         if (valueFrom.getConfigMapKeyRef() != null) {
             String target = component.getNamespace() + ".configmap_" + valueFrom.getConfigMapKeyRef().getName();
             namespace.addRelationship(new C4Relationship(source, target, Constants.MOUNT_RELATIONSHIP, Constants.CONFIGMAP_TECHNOLOGY));
@@ -699,7 +675,7 @@ public class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         }
     }
 
-    private void addOwnerRelationship(C4Namespace namespace, C4Component component) {
+    private void addOwnerRelationship(final C4Namespace namespace, final C4Component component) {
         component.getResource().getMetadata().getOwnerReferences().forEach(ownerReference -> {
             if (Constants.isClusterScoped(ownerReference.getKind())) {
                 final C4Relationship rel = new C4Relationship(

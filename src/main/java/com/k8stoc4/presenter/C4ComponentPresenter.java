@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class C4ComponentPresenter {
     public static String present(C4Component component) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append(component.getKind().toLowerCase()).append(" ").append(PresenterUtils.sanitizeComponentId(component.getId())).append(" '").append(component.getName()).append("' {\n");
         sb.append("    ").append("technology \"").append(component.getKind()).append("\"\n");
         sb.append("    ").append("description \"").append(component.getDescription()).append("\"\n");

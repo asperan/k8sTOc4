@@ -26,7 +26,7 @@ public class C4Component {
     @Setter
     private String namespace;
 
-    public C4Component(HasMetadata resource, String namespace, String name, String kind) {
+    public C4Component(final HasMetadata resource, final String namespace, final String name, final String kind) {
         this.namespace = namespace != null ? namespace : Constants.DEFAULT_NAMESPACE;
         this.resource = resource;
         this.id = kind.toLowerCase() + "_" + PresenterUtils.sanitizeComponentId(name);
