@@ -180,7 +180,7 @@ public final class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
 
     @Override
     public void visit(final Ingress ing) {
-        visitIngress(ing, () ->
+        final C4Component ingress = visitIngress(ing, () ->
             ing.getSpec()
                 .getRules()
                 .stream()
@@ -197,11 +197,12 @@ public final class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                 .distinct()
                 .collect(Collectors.toList())
         );
+        ingress.setDescription(ing.getSpec().getRules().get(0).getHost());
     }
 
     @Override
     public void visit(final io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress ing) {
-        visitIngress(ing, () ->
+        final C4Component ingress = visitIngress(ing, () ->
             ing.getSpec()
                 .getRules()
                 .stream()
@@ -218,6 +219,7 @@ public final class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                 .distinct()
                 .collect(Collectors.toList())
         );
+        ingress.setDescription(ing.getSpec().getRules().get(0).getHost());
     }
 
     @Override

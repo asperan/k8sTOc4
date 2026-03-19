@@ -27,6 +27,7 @@
 
 # Generated outputs
 /.zb/
+/.test/
 
 # Submodule/build artifacts
 **/target/
