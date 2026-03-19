@@ -19,6 +19,7 @@ public class KubeApiServerInputProvider implements ResourceProvider {
         allResources.addAll(KubernetesClient.getInstance().getClient().apps().statefulSets().inAnyNamespace().list().getItems());
         allResources.addAll(KubernetesClient.getInstance().getClient().apps().daemonSets().inAnyNamespace().list().getItems());
         allResources.addAll(KubernetesClient.getInstance().getClient().batch().v1().jobs().inAnyNamespace().list().getItems());
+        allResources.addAll(KubernetesClient.getInstance().getClient().batch().v1().cronjobs().inAnyNamespace().list().getItems());
         allResources.addAll(KubernetesClient.getInstance().getClient().configMaps().inAnyNamespace().list().getItems());
         allResources.addAll(KubernetesClient.getInstance().getClient().nodes().list().getItems());
         allResources.addAll(KubernetesClient.getInstance().getClient().secrets().inAnyNamespace().list().getItems());
