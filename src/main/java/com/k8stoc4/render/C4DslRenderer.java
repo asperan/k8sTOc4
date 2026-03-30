@@ -104,7 +104,7 @@ public class C4DslRenderer {
         for (final C4Namespace namespace : model.getNamespaces().values()) {
             sb.append(Constants.INDENT.repeat(1)).append("view of ").append(namespace.getName()).append(" {\n");
             sb.append(Constants.INDENT.repeat(2)).append("title 'Namespaces / ").append(namespace.getName()).append("'\n");
-            sb.append(Constants.INDENT.repeat(2)).append("include *\n");
+            sb.append(Constants.INDENT.repeat(2)).append("include ").append(namespace.getName()).append(".**\n");
             if (!nodes.isEmpty()) {
                 sb.append(Constants.INDENT.repeat(2)).append("exclude ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
             }
