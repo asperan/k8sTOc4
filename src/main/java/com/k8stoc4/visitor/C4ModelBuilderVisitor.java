@@ -300,7 +300,7 @@ public final class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
                         }
                         container.getEnv().stream()
                             .map(EnvVar::getValue)
-                            .filter(this::isHttpUrl)
+                            .filter(this::isServiceRef)
                             .forEach(value ->
                                 servicesByFqdn.forEach((fqdn, service) -> {
                                     if (value.contains(fqdn)) {
@@ -321,9 +321,15 @@ public final class C4ModelBuilderVisitor implements KubernetesResourceVisitor {
         });
     }
 
-    private boolean isHttpUrl(final String value) {
-        return value != null &&
-                (value.startsWith("http://") || value.startsWith("https://"));
+    private boolean isServiceRef(final String value) {
+        if (value == null) {
+            return false;
+        }
+        return value.startsWith("http://") ||
+                value.startsWith("https://") ||
+                value.startsWith("amqp://") ||
+                value.startsWith("mongodb://") ||
+                value.startsWith("jdbc:");
     }
 
     private void addServiceRelationships() {
