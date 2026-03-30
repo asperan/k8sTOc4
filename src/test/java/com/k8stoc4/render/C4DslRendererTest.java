@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ class C4DslRendererTest {
 
         final C4Model model = visitor.getModel();
         final C4DslRenderer renderer = new C4DslRenderer();
-        final C4DslRenderer.Output output = renderer.render(model);
+        final C4DslRenderer.Output output = renderer.render(model, Set.of());
         final String expectedSpec = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("render/output/expected-complex-spec.txt")))).lines().collect(Collectors.joining("\n")) + "\n";
         final String expectedModel = new BufferedReader(new InputStreamReader(Objects.requireNonNull(classloader.getResourceAsStream("render/output/expected-complex-model.txt")))).lines().collect(Collectors.joining("\n")) + "\n";
         assertEquals(expectedSpec, output.getSpec());

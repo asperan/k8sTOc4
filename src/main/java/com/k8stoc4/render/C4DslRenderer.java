@@ -10,6 +10,7 @@ import com.k8stoc4.presenter.C4NamespacePresenter;
 import com.k8stoc4.presenter.C4RelationshipPresenter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,8 @@ import java.util.stream.Collectors;
 public class C4DslRenderer {
     public C4DslRenderer() {}
 
-    public Output render(final C4Model model) {
-        return new Output(renderModel(model), renderSpec(model), renderViews(model));
+    public Output render(final C4Model model, final Set<String> kindExclusions) {
+        return new Output(renderModel(model), renderSpec(model), renderViews(model, kindExclusions));
     }
 
     // Render principale: workspace
@@ -78,7 +79,7 @@ public class C4DslRenderer {
         return sb.toString();
     }
 
-    private String renderViews(final C4Model model) {
+    private String renderViews(final C4Model model, final Set<String> kindExclusions) {
         final Set<C4Component> nodes = model.getClusterScopedComponentsByKind("Node");
         final StringBuilder sb = new StringBuilder();
         sb.append("global {\n");
@@ -106,6 +107,9 @@ public class C4DslRenderer {
             sb.append(Constants.INDENT.repeat(2)).append("include *\n");
             if (!nodes.isEmpty()) {
                 sb.append(Constants.INDENT.repeat(2)).append("exclude ").append(nodes.stream().map(C4Component::getId).collect(Collectors.joining(", "))).append("\n");
+            }
+            if (!kindExclusions.isEmpty()) {
+                sb.append(Constants.INDENT.repeat(2)).append("exclude * where ").append(kindExclusions.stream().map(it -> "kind is " + it.toLowerCase(Locale.ENGLISH)).collect(Collectors.joining(" or "))).append("\n");
             }
             sb.append(Constants.INDENT.repeat(1)).append("}\n");
         }

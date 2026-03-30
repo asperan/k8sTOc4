@@ -8,6 +8,9 @@ import com.k8stoc4.controller.writer.SystemOutWriter;
 import com.k8stoc4.render.C4DslRenderer;
 import picocli.CommandLine;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @CommandLine.Command(
@@ -54,9 +57,15 @@ public class ParseCommand implements Runnable {
 
     public ParseCommand() {}
 
+    @CommandLine.Option(
+            names = {"-e", "--exclude-kind"},
+            description = "The kinds to exclude from the views"
+    )
+    private List<String> kindExclusions = new ArrayList<>();
+
     @Override
     public void run() {
-        final C4DslRenderer.Output renderOutput = new K8sToC4Controller(new FileInputProvider(input), defaultNs, groupByLabel, rewriteMissing).execute();
+        final C4DslRenderer.Output renderOutput = new K8sToC4Controller(new FileInputProvider(input), defaultNs, groupByLabel, rewriteMissing, new HashSet<>(kindExclusions)).execute();
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
         writer.write(renderOutput);
     }

@@ -12,6 +12,8 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import picocli.CommandLine;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @CommandLine.Command(
@@ -50,11 +52,18 @@ public class DiscoverCommand implements Runnable {
     )
     private boolean rewriteMissing;
 
+    @CommandLine.Option(
+            names = {"-e", "--exclude-kind"},
+            description = "The kinds to exclude from the views",
+            defaultValue = "[]"
+    )
+    private List<String> kindExclusions;
+
     public DiscoverCommand() {}
 
     @Override
     public void run() {
-        final K8sToC4Controller controller = new K8sToC4Controller(new KubeApiServerInputProvider(), Optional.empty(), groupByLabel, rewriteMissing);
+        final K8sToC4Controller controller = new K8sToC4Controller(new KubeApiServerInputProvider(), Optional.empty(), groupByLabel, rewriteMissing, new HashSet<>(kindExclusions));
         final RenderOutputWriter writer = output.isPresent() ? new FileWriter(output.get()) : new SystemOutWriter();
 
         final C4DslRenderer.Output renderOutput = controller.execute();
